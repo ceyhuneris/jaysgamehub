@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>JAY’S GAME HUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#060a13;--mist:#dbe7ff;--dim:#8fa0c0;--pad:clamp(18px,4vw,48px)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--mist);font-family:Outfit,system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+/* arka plan */
+#bg0{position:fixed;inset:0;background:radial-gradient(80% 70% at 70% 15%,#14306b,transparent 70%),radial-gradient(60% 60% at 10% 100%,#0c1f4a,transparent 70%),#060a13}
+#bg0::after{content:"";position:absolute;width:60vmax;height:60vmax;left:-10vmax;top:-20vmax;border-radius:50%;background:radial-gradient(#3b6cff55,transparent 65%);animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(55vw,35vh) scale(1.2)}}
+.bgl{position:fixed;inset:0;opacity:0;transition:opacity 1s;background:radial-gradient(70% 60% at 78% 18%,var(--a),transparent 70%),radial-gradient(60% 70% at 12% 95%,var(--b),transparent 70%)}
+.bgl.on{opacity:.5}
+
+/* logo */
+#logo{--fs:clamp(13px,3.4vw,19px);position:fixed;z-index:30;left:50%;top:50%;display:flex;align-items:center;gap:calc(var(--fs)*.7);opacity:0;transform-origin:0 0;transform:scale(var(--s,1.8)) translate(-50%,-50%);transition:left 1.3s cubic-bezier(.7,0,.2,1),top 1.3s cubic-bezier(.7,0,.2,1),transform 1.3s cubic-bezier(.7,0,.2,1);pointer-events:none}
+#logo.show{opacity:1}
+#logo.docked{left:var(--pad);top:calc(var(--pad)*.55 + env(safe-area-inset-top,0px));transform:scale(1) translate(0,0)}
+#logo svg{width:calc(var(--fs)*3);height:calc(var(--fs)*2.25);color:#9cc3ff;flex:none}
+#logo svg .o{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.3s .1s forwards ease-out}
+#logo svg .i{opacity:0;animation:pop .6s 1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+#logo svg .i{transform-box:fill-box;transform-origin:center}
+#logo b{display:block;font:800 var(--fs)/1 Unbounded,sans-serif;letter-spacing:.06em;white-space:nowrap;background:linear-gradient(100deg,#8ea6cf 35%,#fff 50%,#8ea6cf 65%) 120% 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rev 1.2s .5s both cubic-bezier(.2,.7,.2,1),shine 2.4s 1.2s ease-in-out}
+@keyframes rev{from{clip-path:inset(0 100% 0 0);filter:blur(8px)}to{clip-path:inset(0);filter:blur(0)}}
+@keyframes shine{from{background-position:120% 0}to{background-position:-20% 0}}
+#logo small{display:block;margin-top:.5em;font-size:calc(var(--fs)*.55);letter-spacing:.18em;color:var(--dim);font-weight:300;opacity:0;animation:fin 1s 1.7s forwards}
+@keyframes fin{to{opacity:1}}
+#beam{position:fixed;z-index:25;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,#9cc3ff,#fff,#9cc3ff,transparent);box-shadow:0 0 30px 6px #5b8dff88;transform:scaleX(0);opacity:0}
+#beam.go{animation:beam 1.6s ease-out}
+@keyframes beam{0%{transform:scaleX(0);opacity:1}60%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1.2) scaleY(0);opacity:0}}
+
+/* başlangıç */
+#start{position:fixed;inset:0;z-index:50;display:grid;place-items:center;text-align:center;padding:0 24px;transition:opacity .6s;font-weight:600;letter-spacing:.2em;font-size:clamp(22px,5.5vw,40px);line-height:1.4;color:var(--mist);cursor:pointer;text-shadow:0 0 30px #5b8dff88}
+#start span{animation:pulse 2s ease-in-out infinite}
+#start.off{opacity:0;pointer-events:none}
+@keyframes pulse{50%{opacity:.3}}
+
+
+/* kütüphane */
+#lib{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .9s}
+#lib.on{opacity:1;pointer-events:auto}
+header{position:absolute;left:0;right:0;top:0;height:calc(var(--pad)*1.5 + env(safe-area-inset-top,0px));padding:calc(var(--pad)*.55 + env(safe-area-inset-top,0px)) var(--pad) 0;display:flex;justify-content:flex-end;align-items:flex-start;gap:14px;font-size:15px}
+.tab{position:absolute;left:50%;top:calc(var(--pad)*.55 + env(safe-area-inset-top,0px) + 4px);transform:translateX(-50%);font-weight:600;font-size:17px;padding-bottom:6px;border-bottom:3px solid #fff}
+#clock{font-weight:300;font-size:18px;padding-top:4px;font-variant-numeric:tabular-nums}
+#sbtn{background:#ffffff14;border:0;border-radius:99px;padding:6px 14px;font-size:13px;backdrop-filter:blur(8px)}
+.panel{position:absolute;z-index:5;right:var(--pad);top:calc(var(--pad)*.55 + env(safe-area-inset-top,0px) + 44px);width:min(310px,calc(100vw - var(--pad)*2));padding:18px;border-radius:18px;background:#0b1226d9;border:1px solid #ffffff1f;backdrop-filter:blur(16px);box-shadow:0 20px 50px #000a;opacity:0;pointer-events:none;transform:translateY(-8px);transition:.25s}
+.panel.open{opacity:1;pointer-events:auto;transform:none}
+.prow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 12px}
+.prow+.prow{margin-top:18px}
+.prow label{font-weight:600;font-size:15px}
+.prow input[type=range]{grid-column:1/3;width:100%;accent-color:#9cc3ff;height:24px}
+.sw{width:46px;height:26px;border-radius:99px;border:0;background:#ffffff2e;position:relative;transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s}
+.sw[aria-pressed=true]{background:#5b8dff}
+.sw[aria-pressed=true]::after{transform:translateX(20px)}
+.prow.off input[type=range]{opacity:.35}
+.stage{position:absolute;left:0;right:0;top:50%;transform:translateY(-45%)}
+.row{--w:clamp(170px,30vw,280px);position:relative;height:calc(var(--w)*1.3);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.tile{position:absolute;left:50%;top:50%;width:var(--w);aspect-ratio:1;margin:calc(var(--w)/-2) 0 0 calc(var(--w)/-2);border:0;padding:0;background:none;border-radius:18px;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .55s,filter .55s}
+.tile svg{display:block;width:100%;height:100%;border-radius:18px;box-shadow:0 16px 40px #0009;pointer-events:none}
+.tile::before{content:"";position:absolute;inset:0;border-radius:18px;z-index:1;background:linear-gradient(135deg,#ffffff38,transparent 38%);pointer-events:none}
+.tile.f::after{content:"";position:absolute;inset:-5px;border-radius:23px;border:3px solid #fff;box-shadow:0 0 30px #a0c8ff99;z-index:2}
+#lib.on .tile{animation:rise .8s calc(.25s + var(--i)*.12s) backwards cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;translate:0 40px}to{opacity:1;translate:0 0}}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:-6px}
+.dots i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:.3s}
+.dots i.on{background:#fff;width:22px;border-radius:99px}
+.meta{padding:0 var(--pad);min-height:70px;text-align:center}
+.meta h2{font:800 clamp(22px,3.4vw,34px)/1.1 Unbounded,sans-serif;transition:opacity .2s}
+.meta p{margin-top:8px;color:var(--dim);font-weight:300}
+.hint{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:var(--pad);font-size:13px;color:#ffffff66;letter-spacing:.06em}
+@media(hover:none){.hint{display:none}}
+@media(max-width:560px){.tab{display:none}.stage{transform:translateY(-50%)}}
+
+/* bilgi ekranı */
+#info{position:fixed;inset:0;z-index:40;opacity:0;pointer-events:none;transition:opacity .45s;overflow-y:auto}
+#info.on{opacity:1;pointer-events:auto}
+.ibg{position:fixed;inset:0;background:radial-gradient(80% 70% at 80% 10%,var(--a),transparent 70%),radial-gradient(70% 70% at 10% 100%,var(--b),transparent 70%),#060a13;opacity:.9}
+.ibg::after{content:"";position:absolute;inset:0;background:#060a1366}
+.back{position:fixed;z-index:3;top:calc(var(--pad)*.55 + env(safe-area-inset-top,0px));left:var(--pad);background:#ffffff1c;border:0;border-radius:99px;padding:10px 20px;backdrop-filter:blur(10px)}
+.ic{position:relative;z-index:2;min-height:100%;display:flex;align-items:center;justify-content:center;gap:clamp(24px,5vw,64px);padding:90px var(--pad) 40px;flex-wrap:wrap}
+.icover{width:clamp(170px,30vw,340px);aspect-ratio:1;flex:none;transform:scale(.88);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+#info.on .icover{transform:none}
+.icover svg{width:100%;height:100%;border-radius:20px;box-shadow:0 24px 70px #000a}
+.itx{max-width:460px;width:100%}
+.itx h1{font:800 clamp(30px,5vw,54px)/1.05 Unbounded,sans-serif}
+.itx .by{margin-top:10px;color:var(--dim);font-weight:300;letter-spacing:.14em;font-size:13px}
+.play{margin:28px 0;background:#fff;color:#0a1020;border:0;border-radius:99px;padding:15px 54px;font-weight:600;font-size:18px;transition:transform .2s}
+.play:hover{transform:scale(1.05)}
+.soon{background:#ffffff12;border:1px solid #ffffff1f;border-radius:16px;padding:18px 20px;backdrop-filter:blur(12px)}
+.soon h3{font-size:16px;font-weight:600}
+.soon p{color:var(--mist);font-weight:300;line-height:1.6;font-size:17px}
+#flash{position:fixed;inset:0;z-index:60;background:#fff;opacity:0;pointer-events:none;transition:opacity .6s}
+#flash.go{opacity:1}
+@media(max-width:700px){.itx{text-align:center}.play{width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="bg0"></div>
+<div id="bgs"></div>
+<div id="beam"></div>
+
+<div id="logo">
+  <svg viewBox="0 0 48 36"><path class="o" pathLength="1" d="M14 7H34C40 7 43 11 45 19L46.5 27C47 31 44 33 41 32C38.5 31 37 29 35 26H13C11 29 9.5 31 7 32C4 33 1 31 1.5 27L3 19C5 11 8 7 14 7Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><g class="i"><path d="M13 12.5V21.5M8.5 17H17.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><circle cx="35" cy="12.8" r="1.9" fill="currentColor"/><circle cx="35" cy="21.2" r="1.9" fill="currentColor"/><circle cx="30.8" cy="17" r="1.9" fill="currentColor"/><circle cx="39.2" cy="17" r="1.9" fill="currentColor"/></g></svg>
+  <div><b>JAY’S GAME HUB</b><small>by Ceyhun Eriş</small></div>
+</div>
+
+<div id="start"><span>BAŞLAMAK İÇİN DOKUN</span></div>
+
+<div id="lib">
+  <header><div class="tab">Oyunlar</div><div id="clock"></div><button id="sbtn" aria-expanded="false">♪ Ses</button>
+    <div class="panel" id="panel">
+      <div class="prow" id="rs"><label for="vs">Ses efektleri</label><button class="sw" id="ts" aria-pressed="true" aria-label="Ses efektleri aç/kapat"></button><input type="range" id="vs" min="0" max="100" value="80"></div>
+      <div class="prow" id="rm"><label for="vm">Müzik</label><button class="sw" id="tm" aria-pressed="true" aria-label="Müzik aç/kapat"></button><input type="range" id="vm" min="0" max="100" value="60"></div>
+    </div>
+  </header>
+  <div class="stage">
+    <div class="row" id="row"></div>
+    <div class="dots" id="dots"></div>
+    <div class="meta"><h2 id="gt"></h2><p id="gs">Bilgi ekranını açmak için seç</p></div>
+  </div>
+  <div class="hint">← → gez &nbsp; Enter aç &nbsp; Esc geri</div>
+</div>
+
+<section id="info">
+  <div class="ibg"></div>
+  <button class="back" id="back">‹ Geri</button>
+  <div class="ic">
+    <div class="icover" id="ic"></div>
+    <div class="itx">
+      <h1 id="it"></h1>
+      <div class="by">JAY’S GAME HUB</div>
+      <button class="play" id="play">Oyna</button>
+      <div class="soon"><p id="id"></p></div>
+    </div>
+  </div>
+</section>
+<div id="flash"></div>
+
+<script>
+const F="font-family=\"Unbounded,sans-serif\"";
+const G=[
+{n:"9/9",file:"9outof9.html",d:"Wanna guess words, taste some hot chili, and walk through a minefield?",a:"#ff6a3d",b:"#6a1fff",
+ art:`<svg viewBox="0 0 100 100"><defs><linearGradient id="g0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8a4a"/><stop offset="1" stop-color="#7a1fff"/></linearGradient></defs><rect width="100" height="100" fill="url(#g0)"/><path d="M-5 80 105 20" stroke="#fff" stroke-width="2"/><text x="9" y="52" ${F} font-weight="800" font-size="50" fill="#fff">9</text><text x="92" y="94" text-anchor="end" ${F} font-weight="800" font-size="50" fill="#1a0a3a" fill-opacity=".8">9</text></svg>`},
+{n:"LANGUAGE RUSH",file:"languagerush.html",d:"Put your English to the test, advance step by step, and cross the finish line first!",a:"#ff3d8b",b:"#3a1fff",
+ art:`<svg viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a0f55"/><stop offset="1" stop-color="#0a0620"/></linearGradient><pattern id="ck" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#fff"/><rect x="5" y="5" width="5" height="5" fill="#fff"/></pattern></defs><rect width="100" height="100" fill="url(#g1)"/><rect y="0" width="100" height="10" fill="url(#ck)" fill-opacity=".14"/><rect y="90" width="100" height="10" fill="url(#ck)" fill-opacity=".14"/><path d="M-5 70 105 30" stroke="#ff3d8b" stroke-opacity=".35" stroke-width="2"/><text x="50" y="44" text-anchor="middle" ${F} font-weight="800" font-size="12.5" textLength="84" lengthAdjust="spacingAndGlyphs" fill="#ff4f9a">LANGUAGE</text><text x="50" y="76" text-anchor="middle" ${F} font-weight="800" font-size="30" textLength="84" lengthAdjust="spacingAndGlyphs" fill="#fff">RUSH</text></svg>`}
+];
+const $=s=>document.querySelector(s);
+let ctx,sfxG,musG,sfxOn=true,musOn=true,sfxVol=.8,musVol=.6,idx=0,state="start",tiles=[],bgs=[];
+
+/* ses */
+const au=()=>{try{if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();sfxG=ctx.createGain();musG=ctx.createGain();sfxG.connect(ctx.destination);musG.connect(ctx.destination);applyVol(true)}if(ctx.state==="suspended")ctx.resume()}catch(e){}return ctx};
+function applyVol(now){if(!ctx)return;const t=ctx.currentTime;sfxG.gain.setTargetAtTime(sfxOn?sfxVol:0,t,now?0.001:.05);musG.gain.setTargetAtTime(musOn?musVol:0,t,now?0.001:.6)}
+function tone(f,d,o={}){if(!sfxOn)return;const c=au();if(!c)return;const t=c.currentTime+(o.t||0),os=c.createOscillator(),g=c.createGain();os.type=o.type||"sine";os.frequency.setValueAtTime(f,t);if(o.to)os.frequency.exponentialRampToValueAtTime(o.to,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(o.v||.08,t+(o.a||.01));g.gain.exponentialRampToValueAtTime(.0001,t+d);os.connect(g).connect(sfxG);os.start(t);os.stop(t+d+.05)}
+const S={
+ move:()=>tone(1400,.07,{v:.05,to:1000}),
+ open:()=>{tone(660,.25,{v:.07});tone(990,.35,{v:.06,t:.07})},
+ back:()=>tone(600,.18,{v:.06,to:400}),
+ whoosh:()=>tone(200,1,{type:"sawtooth",v:.02,to:1800,a:.5}),
+ intro:()=>{tone(55,3,{v:.14,to:110,a:1.6});[392,523,659,784,1047].forEach((f,i)=>tone(f,1.4,{v:.05,t:.9+i*.14,a:.05}));[261,329,392,523].forEach(f=>tone(f,2.2,{v:.04,t:1.7,a:.3}))},
+ play:()=>{tone(300,.7,{type:"triangle",v:.07,to:1500});tone(1200,.5,{v:.05,t:.3})}
+};
+
+/* ambient müzik */
+let musStarted=false;
+function startMusic(){
+ if(musStarted)return;const c=au();if(!c)return;musStarted=true;
+ const bus=c.createGain();bus.gain.value=1;
+ const lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=900;lp.Q.value=.4;
+ const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=.04;lg.gain.value=280;lfo.connect(lg).connect(lp.frequency);lfo.start();
+ const len=c.sampleRate*3.5,ir=c.createBuffer(2,len,c.sampleRate);
+ for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+ const cv=c.createConvolver();cv.buffer=ir;const wet=c.createGain();wet.gain.value=.55;
+ bus.connect(lp);lp.connect(musG);lp.connect(cv);cv.connect(wet).connect(musG);
+ const chords=[[73.42,146.83,220,261.63,329.63],[58.27,116.54,174.61,220,293.66],[87.31,174.61,220,261.63,329.63],[98,196,233.08,293.66,349.23]];
+ const oscs=[];
+ chords[0].forEach((f,n)=>{[-5,5].forEach((det,j)=>{
+  const o=c.createOscillator(),g=c.createGain(),l=c.createOscillator(),lgn=c.createGain();
+  o.type=j?"triangle":"sine";o.frequency.value=f;o.detune.value=det;
+  g.gain.value=n===0?.05:.028;
+  l.frequency.value=.05+Math.random()*.08;lgn.gain.value=g.gain.value*.5;l.connect(lgn).connect(g.gain);l.start();
+  o.connect(g).connect(bus);o.start();oscs.push({o,n});
+ })});
+ let ci=0;
+ setInterval(()=>{ci=(ci+1)%chords.length;const t=c.currentTime;oscs.forEach(({o,n})=>o.frequency.setTargetAtTime(chords[ci][n],t,3))},18000);
+ const bells=[587.33,659.25,783.99,880,987.77,1174.66];
+ (function bell(){
+  if(musOn&&c.state==="running"){
+   const f=bells[Math.floor(Math.random()*bells.length)],t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+   o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.03,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+4.5);
+   o.connect(g);g.connect(bus);o.start(t);o.stop(t+4.6);
+  }
+  setTimeout(bell,4000+Math.random()*5000);
+ })();
+}
+addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(state!=="start")ctx.resume()});
+
+/* ses ayarları */
+const panel=$("#panel"),vs=$("#vs"),vm=$("#vm"),ts=$("#ts"),tm=$("#tm");
+function syncUI(){
+ ts.setAttribute("aria-pressed",sfxOn);tm.setAttribute("aria-pressed",musOn);
+ $("#rs").classList.toggle("off",!sfxOn);$("#rm").classList.toggle("off",!musOn);
+ vs.value=Math.round(sfxVol*100);vm.value=Math.round(musVol*100);
+}
+function save(){try{localStorage.setItem("jgh-audio",JSON.stringify({sfxOn,musOn,sfxVol,musVol}))}catch(e){}}
+try{const sv=JSON.parse(localStorage.getItem("jgh-audio")||"null");if(sv){sfxOn=sv.sfxOn!==false;musOn=sv.musOn!==false;sfxVol=sv.sfxVol??.8;musVol=sv.musVol??.6}}catch(e){}
+syncUI();
+const setPanel=o=>{panel.classList.toggle("open",o);$("#sbtn").setAttribute("aria-expanded",o)};
+$("#sbtn").onclick=e=>{e.stopPropagation();setPanel(!panel.classList.contains("open"));S.move()};
+panel.onclick=e=>e.stopPropagation();
+addEventListener("click",()=>setPanel(false));
+ts.onclick=()=>{sfxOn=!sfxOn;applyVol();syncUI();save();if(sfxOn)S.move()};
+tm.onclick=()=>{musOn=!musOn;au();applyVol();syncUI();save();if(musOn)startMusic()};
+vs.oninput=()=>{sfxVol=vs.value/100;if(!sfxOn){sfxOn=true;syncUI()}applyVol();save()};
+vs.onchange=()=>S.move();
+vm.oninput=()=>{musVol=vm.value/100;if(!musOn){musOn=true;syncUI()}au();applyVol();save();startMusic()};
+
+/* kütüphane */
+const row=$("#row");
+G.forEach((g,i)=>{
+ const b=document.createElement("button");b.className="tile";b.style.setProperty("--i",i);b.setAttribute("aria-label",g.n);b.innerHTML=g.art;
+ b.onclick=()=>{if(moved)return;if(i===idx)openInfo();else focus(i)};row.appendChild(b);tiles.push(b);
+ const l=document.createElement("div");l.className="bgl";l.style.setProperty("--a",g.a);l.style.setProperty("--b",g.b);$("#bgs").appendChild(l);bgs.push(l);
+});
+const dots=$("#dots");G.forEach(()=>dots.appendChild(document.createElement("i")));
+let moved=false;
+
+function layout(){
+ tiles.forEach((t,k)=>{
+  const d=k-idx,ad=Math.abs(d),sg=d<0?-1:1;
+  if(d===0){t.style.transform="translateX(0) scale(1.1)";t.style.opacity=1;t.style.filter="none";t.style.zIndex=5}
+  else{t.style.transform=`translateX(${sg*(62+(ad-1)*14)}%) scale(${Math.max(.5,.78-(ad-1)*.1)})`;t.style.opacity=ad>2?0:.55;t.style.filter="brightness(.55) saturate(.8)";t.style.zIndex=5-ad}
+ });
+}
+function focus(i,snd=true){
+ const n=Math.max(0,Math.min(G.length-1,i)),ch=n!==idx;idx=n;
+ tiles.forEach((t,k)=>{t.classList.toggle("f",k===idx);bgs[k].classList.toggle("on",k===idx)});
+ [...dots.children].forEach((d,k)=>d.classList.toggle("on",k===idx));
+ $("#gt").textContent=G[idx].n;layout();
+ if(snd&&ch)S.move();
+}
+(()=>{let x0=null;
+ row.addEventListener("pointerdown",e=>{x0=e.clientX;moved=false});
+ addEventListener("pointerup",e=>{if(x0===null)return;const dx=e.clientX-x0;x0=null;
+  if(state==="lib"&&Math.abs(dx)>40){moved=true;focus(idx+(dx<0?1:-1));setTimeout(()=>moved=false,50)}});
+ let wl=0;
+ addEventListener("wheel",e=>{if(state!=="lib"||e.target.closest("#panel"))return;const v=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;const n=Date.now();if(Math.abs(v)>12&&n-wl>350){wl=n;focus(idx+(v>0?1:-1))}},{passive:true});
+})();
+function openInfo(){
+ const g=G[idx];state="info";S.open();
+ $("#ic").innerHTML=g.art;$("#it").textContent=g.n;$("#id").textContent=g.d;
+ $("#info .ibg").style.setProperty("--a",g.a);$("#info .ibg").style.setProperty("--b",g.b);
+ $("#info").classList.add("on");setTimeout(()=>$("#play").focus({preventScroll:true}),300);
+}
+function closeInfo(){state="lib";S.back();$("#info").classList.remove("on");tiles[idx].focus({preventScroll:true})}
+function play(){
+ if(state==="go")return;state="go";S.play();$("#flash").classList.add("go");
+ setTimeout(()=>{location.href=G[idx].file},700);
+}
+$("#back").onclick=closeInfo;$("#play").onclick=play;
+addEventListener("pageshow",()=>{$("#flash").classList.remove("go");if(state==="go")state="info"});
+
+/* açılış */
+function start(){
+ if(state!=="start")return;state="intro";au();
+ $("#start").classList.add("off");
+ const lg=$("#logo");
+ lg.style.setProperty("--s",Math.min(2.1,innerWidth*.8/lg.offsetWidth));
+ S.intro();lg.classList.add("show");$("#beam").classList.add("go");
+ if(musOn)setTimeout(startMusic,2800);
+ setTimeout(()=>{S.whoosh();lg.classList.add("docked")},3400);
+ setTimeout(()=>{$("#lib").classList.add("on");state="lib";focus(0,false);S.open()},4200);
+}
+$("#start").onclick=start;
+addEventListener("keydown",e=>{
+ if(state==="start"){start();return}
+ if(e.key==="Escape"&&panel.classList.contains("open")){setPanel(false);return}
+ if(e.target.tagName==="INPUT"||e.target.closest&&e.target.closest("#panel"))return;
+ if(state==="lib"){
+  if(e.key==="ArrowRight")focus(idx+1);
+  else if(e.key==="ArrowLeft")focus(idx-1);
+  else if(e.key==="Enter"&&document.activeElement.className.indexOf("tile")<0){openInfo()}
+ }else if(state==="info"&&e.key==="Escape")closeInfo();
+});
+const clk=()=>{$("#clock").textContent=new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})};
+clk();setInterval(clk,15000);
+</script>
+</body>
+</html>

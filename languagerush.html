@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LANGUAGE RUSH</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2d1e4f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{height:100%}
+body{margin:0;min-height:100%;font-family:'Fredoka','Comic Sans MS','Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at 15% 8%,#fff9 0 7%,#0000 8%),radial-gradient(circle at 85% 25%,#fff8 0 5%,#0000 6%),linear-gradient(#6fd3ff,#d4f3ff 60%,#b6f0a8);background-attachment:fixed}
+[hidden]{display:none!important}
+#app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;margin:0 auto;padding:8px 8px 20px;text-align:center}
+#setup{width:100%;max-width:540px;margin:0 auto;zoom:var(--z,1)}
+#game{width:100%}
+#panel,#roster{zoom:var(--z,1)}
+#ov .card{zoom:var(--z,1)}
+.logo{font-weight:700;letter-spacing:1px;color:#ffe14d;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);line-height:1}
+.logo b{color:#ff5d8f}
+.big{font-size:clamp(40px,13vw,72px)}
+.btn{font:inherit;font-weight:700;font-size:20px;color:#fff;background:#ff5d8f;border:3px solid var(--ink);border-radius:16px;padding:8px 20px;box-shadow:0 5px 0 var(--ink);cursor:pointer}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.btn.g{background:#2ecc71}.btn.s{font-size:22px;padding:0 16px}
+.card{background:#fff;border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:14px}
+#splash{position:fixed;inset:0;z-index:50;background:linear-gradient(#6fd3ff,#ffe9a8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px}
+#splash{overflow:hidden;background:linear-gradient(#8fdcff,#fff1c2 70%,#ffd9e8)}
+#splash .logo,#splash #menu{zoom:var(--z,1);position:relative;z-index:2}
+#splash .logo{text-align:center}
+#splash .logo span{display:inline-block;animation:softIn 1.3s cubic-bezier(.3,1.25,.5,1) both,bob 3.2s ease-in-out infinite}
+@keyframes softIn{0%{transform:translateY(46px) scale(.55) rotate(-9deg);opacity:0;filter:blur(7px)}55%{transform:translateY(-9px) scale(1.05) rotate(3deg);opacity:1;filter:blur(0)}80%{transform:translateY(3px) scale(.99) rotate(-1deg)}100%{transform:none;opacity:1;filter:blur(0)}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(-1.8deg)}}
+#splash .fl{position:absolute;inset:0;pointer-events:none;z-index:1}
+#splash .fl span{position:absolute;opacity:0;animation:drift 7s ease-in-out infinite}
+@keyframes drift{0%{transform:translateY(30px) scale(.7) rotate(-8deg);opacity:0}25%,70%{opacity:.85}100%{transform:translateY(-70px) scale(1) rotate(10deg);opacity:0}}
+#menu:not([hidden]){animation:rise .8s cubic-bezier(.3,1.2,.5,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.9)}to{opacity:1;transform:none}}
+#menu .btn{animation:pulse 2.4s ease-in-out .9s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@media (prefers-reduced-motion:reduce){#splash .logo span,#splash .fl span,#menu .btn{animation-duration:.01s;animation-iteration-count:1}}
+#mute,#mus{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:8px;z-index:60;font-size:22px;width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:#fff;box-shadow:0 3px 0 var(--ink);cursor:pointer}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0}
+.row input{flex:1;min-width:0;font:inherit;font-size:18px;padding:8px 10px;border:3px solid var(--ink);border-radius:12px;color:var(--ink)}
+.eb{font-size:30px;width:56px;height:52px;border:3px solid var(--ink);border-radius:50%;background:#fff3a8;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.cnt{display:flex;justify-content:center;align-items:center;gap:14px;font-size:26px;font-weight:700;margin:8px 0}
+#board{--s:calc(min(96vw,520px)/7);display:grid;grid-template-columns:repeat(7,var(--s));grid-template-rows:repeat(3,var(--s));gap:5px;justify-content:center;margin:8px auto;padding:8px;background:#ffffff80;border:3px solid var(--ink);border-radius:24px;width:max-content;max-width:100%}
+#board.v{grid-template-columns:var(--s) 1fr var(--s);grid-template-rows:repeat(7,var(--s));width:min(96vw,520px)}
+.tile{position:relative;border:3px solid var(--ink);border-radius:14px;box-shadow:0 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;background:#fff7e6}
+.tile.o{background:#e6f6ff}
+.nb{position:absolute;top:-3px;left:-3px;min-width:calc(var(--s)*.3);height:calc(var(--s)*.3);padding:0 3px;border-radius:50% 10px 50% 10px;background:#6c5ce7;color:#fff;font-weight:700;font-size:calc(var(--s)*.22);display:flex;align-items:center;justify-content:center;border:2px solid var(--ink)}
+.mk{position:absolute;top:1px;right:4px;font-size:calc(var(--s)*.22);color:#6c5ce7;font-weight:700}
+.tile.c{background:linear-gradient(135deg,#ffe14d,#ffb938)}.tile.c .nb{background:#ff5d8f}.tile.c .mk{color:#7a4a00;font-size:calc(var(--s)*.26)}
+.tile.s0{background:#5be37d}.tile.f{background:conic-gradient(#fff 25%,#222 0 50%,#fff 0 75%,#222 0) 0 0/50% 50%}
+.lb{position:absolute;bottom:2px;font-size:calc(var(--s)*.2);font-weight:700;background:#fff;border-radius:6px;padding:0 4px}
+.tk{position:absolute;inset:0;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:1px;padding:3px;pointer-events:none}
+.em{display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--ink);border-radius:50%;width:calc(var(--s)*.6);height:calc(var(--s)*.6);font-size:calc(var(--s)*.4);line-height:1}
+.c4 .em{width:calc(var(--s)*.38);height:calc(var(--s)*.38);font-size:calc(var(--s)*.24)}
+.c9 .em{width:calc(var(--s)*.27);height:calc(var(--s)*.27);font-size:calc(var(--s)*.17);border-width:1.5px}
+.em.me{animation:hop .6s infinite;background:#fff3a8;z-index:2}
+@keyframes hop{50%{transform:translateY(-6px) scale(1.1)}}
+.mid{grid-column:2/7;grid-row:2;display:flex;align-items:center;justify-content:center;gap:8px}
+.mid .logo{font-size:calc(var(--s)*.46);text-align:center}
+#board.v .mid{grid-column:2;grid-row:2/7;flex-direction:column;justify-content:space-around}
+#board.v .mid .logo{font-size:calc(var(--s)*.4)}
+#panel{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0;flex-wrap:wrap}
+#board.v #panel{flex-direction:column;margin:0;gap:6px}
+#who{font-size:17px;font-weight:700;background:#fff;border:3px solid var(--ink);border-radius:14px;padding:5px 10px;box-shadow:0 3px 0 var(--ink)}
+#dice{width:76px;height:68px;background:#ffd23f;clip-path:polygon(50% 0,100% 100%,0 100%);display:flex;align-items:flex-end;justify-content:center;font-size:30px;font-weight:700;padding-bottom:5px}
+.dw{filter:drop-shadow(0 3px 0 #2d1e4f)}
+#dice.rl{animation:spin .25s infinite}
+@keyframes spin{50%{transform:rotate(25deg) scale(1.1)}}
+#roster{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:2px 9px;font-weight:700;font-size:14px}
+.chip.on{background:#ffe14d;transform:scale(1.07)}
+#ov{position:fixed;inset:0;background:#2d1e4fb0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:20;overflow:auto}
+#ov .card{width:100%;max-width:430px}
+.qh{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:20px}
+.tm{background:#ff5d8f;color:#fff;border:3px solid var(--ink);border-radius:50%;width:46px;height:46px;display:flex;align-items:center;justify-content:center}
+.bar{height:14px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;margin:8px 0;background:#fff}
+.bar i{display:block;height:100%;width:100%;background:#2ecc71}
+.tag{display:inline-block;background:#8a5cff;color:#fff;border-radius:10px;padding:1px 10px;font-size:14px;font-weight:700}
+.qt{font-size:22px;font-weight:700;margin:10px 0}
+.opts{display:grid;gap:8px}
+.opt{font:inherit;font-weight:700;font-size:19px;color:var(--ink);background:#bde7ff;border:3px solid var(--ink);border-radius:14px;padding:10px;box-shadow:0 4px 0 var(--ink);cursor:pointer}
+.opt.ok{background:#5be37d}.opt.no{background:#ff7b7b}
+.pass{font-size:16px;padding:6px 16px;margin-top:10px;background:#8a5cff}.pass.pen{background:#e0334f}.pass:disabled{opacity:.4;cursor:default;box-shadow:0 5px 0 var(--ink)}
+.fb{font-size:20px;font-weight:700;margin-top:8px;min-height:26px}
+.cardbox{font-size:56px}.cardbox h3{font-size:24px;margin:4px 0}.cardbox p{font-size:18px;margin:4px 0 10px}
+.good{color:#1fa855}.bad{color:#e0334f}
+.fin h3{margin:0;font-size:22px}.fin svg{width:100%;max-width:340px;height:auto}
+.fin svg.sh{animation:shk .12s infinite}
+@keyframes shk{50%{transform:translateX(-2px)}}
+.cf{position:fixed;top:-40px;font-size:28px;animation:fall 3s linear infinite;z-index:70;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+#mus{right:56px}#menu{display:flex;flex-direction:column;gap:14px;align-items:center}#menu .btn{font-size:26px;min-width:240px}
+</style></head><body>
+<button id="mus" class="mb">🎵</button><button id="mute">🔊</button>
+<div id="splash"><div class="fl" id="fl"></div><div class="logo big" id="sl"></div><div id="menu" hidden><button class="btn g" id="play">▶ START</button></div></div>
+<div id="app">
+ <div id="setup" hidden>
+  <div class="logo" style="font-size:38px;margin:8px 0 12px">LANGUAGE <b>RUSH</b></div>
+  <div class="card">
+   <div style="font-size:18px">How many players? (2–8)</div>
+   <div class="cnt"><button class="btn s" id="mn">−</button><span id="cnt">2</span><button class="btn s" id="pl">+</button></div>
+   <div id="rows"></div>
+   <div style="font-size:14px;margin:6px 0">Tap an animal to change your character.</div>
+   <button class="btn g" id="go">Start Game!</button>
+  </div>
+ </div>
+ <div id="game" hidden>
+  <div id="board"></div>
+  <div id="panel"><div id="who"></div><div class="dw"><div id="dice">?</div></div><button class="btn" id="rollBtn">Roll!</button></div>
+  <div id="roster"></div>
+ </div>
+ <div id="ov" hidden><div class="card"><div class="scene"></div><div class="qa"></div></div></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+/* sound */
+let AC,mute=false;
+const snd=(f,d=.12,ty='sine',v=.15,t=0,sl)=>{if(mute||!AC)return;try{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+t;o.type=ty;o.frequency.setValueAtTime(f,s);if(sl)o.frequency.exponentialRampToValueAtTime(sl,s+d);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}};
+const seq=(a,d,ty,v,gap)=>a.forEach((f,i)=>snd(f,d,ty,v,i*gap));
+const S={tick:()=>snd(900,.04,'square',.05),step:()=>snd(450,.09,'triangle',.18,0,700),warn:()=>snd(1000,.07,'square',.07),
+ ok:()=>seq([523,659,784,1047],.16,'triangle',.2,.09),no:()=>{snd(240,.4,'sawtooth',.14,0,90)},card:()=>seq([880,1175,1568],.12,'sine',.15,.07),
+ boing:()=>snd(140,.55,'sine',.3,0,700),stretch:()=>snd(180,1.8,'sawtooth',.05,0,650),snap:()=>snd(1400,.18,'square',.1,0,100),
+ win:()=>seq([523,659,784,1047,784,1047,1319,1568],.22,'triangle',.2,.13),pop:()=>seq([400,600],.1,'sine',.15,.06)};
+$('#mute').onclick=()=>{mute=!mute;$('#mute').textContent=mute?'🔇':'🔊'};
+let musOn=true,mst=0,mi;
+const MEL=[523,0,659,0,784,0,659,0,440,0,523,0,659,0,523,0,523,0,440,0,349,0,440,523,494,0,587,0,784,0,587,0],BASS=[131,110,87,98];
+function music(){if(!AC||AC.state!='running'||!musOn||mute||document.hidden)return;const m=MEL[mst%32];if(m)snd(m,.24,'triangle',.05);if(mst%2==0)snd(BASS[(mst>>3)%4],.3,'sine',.09);if(mst%4==2)snd(1500,.03,'square',.012);if(mst%8==0)snd(70,.15,'sine',.12,0,40);mst++}
+const initAudio=()=>{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume();if(!mi)mi=setInterval(music,170)};
+/* music starts as soon as the page opens; if the browser blocks autoplay, it starts on the very first tap/click/key */
+const unlock=()=>{try{initAudio();if(AC.state=='running')['pointerdown','touchend','click','keydown'].forEach(e=>removeEventListener(e,unlock,true))}catch(e){}};
+['pointerdown','touchend','click','keydown'].forEach(e=>addEventListener(e,unlock,true));
+try{initAudio();AC.onstatechange=unlock}catch(e){}
+$('#mus').onclick=()=>{initAudio();musOn=!musOn;$('#mus').style.opacity=musOn?1:.45};
+/* data */
+const ANIMALS=['🐱','🐶','🐰','🦊','🐼','🐸','🦁','🐵','🐧','🐷','🐨','🐯'];
+const NAMES=['Cookie','Bubbles','Peanut','Noodle','Pickle','Waffles','Mochi','Biscuit'];
+const CH=[3,6,9,12];
+const PASSES=2; /* passes each player may use per game (set 99 for practically unlimited) */
+const QS=[["g","Look! The train ___ into the station right now.","is coming","comes","came","was coming"],
+["g","We usually ___ our summer holidays in a quiet village.","spend","are spending","spent","were spending"],
+["g","Henry VIII ___ a powerful king in the 16th century.","was","is","were","are"],
+["g","The Vikings ___ wooden longboats hundreds of years ago.","built","build","are building","were building"],
+["g","What ___ you ___ at 8 o’clock yesterday evening?","were / doing","do / do","are / doing","did / do"],
+["g","She ___ a uniform to school every day.","wears","is wearing","wore","was wearing"],
+["g","While they ___ in the lake, it started to rain.","were swimming","swim","are swimming","swam"],
+["g","I ___ to the airport two hours ago.","went","go","am going","was going"],
+["g","Listen! The baby ___ in the bedroom.","is crying","cries","cried","was crying"],
+["g","Alexander the Great ___ fearlessly against his enemies.","fought","fight","fights","is fighting"],
+["g","They ___ cycling on Sundays; it is their routine.","go","are going","went","were going"],
+["g","Yesterday afternoon, I ___ in the city square when I met Tom.","was walking","walk","am walking","walked"],
+["g","The ancient Egyptians ___ chariots.","rode","ride","are riding","were riding"],
+["g","Be quiet! The librarian ___ at us.","is looking","looks","looked","was looking"],
+["g","Where ___ you yesterday morning?","were","are","was","did"],
+["g","My brother ___ his mobile phone in the park yesterday.","lost","loses","is losing","was losing"],
+["g","He ___ by plane because he is afraid of flying.","never travels","is never travelling","didn’t travel","was not travelling"],
+["g","While she ___ dinner, the telephone rang.","was cooking","cooks","is cooking","cooked"],
+["g","Why ___ you ___ your suitcase now?","are / packing","do / pack","did / pack","were / packing"],
+["g","The Colossus of Rhodes ___ a giant statue.","was","is","were","are"],
+["g","I ___ at the cinema last Saturday.","was","am","were","did"],
+["g","What ___ they ___ when the teacher entered the classroom?","were / doing","do / do","did / do","are / doing"],
+["g","People in ancient times ___ pottery to store water.","made","make","are making","were making"],
+["g","Right now, Derek ___ a slice of pizza near the fountain.","is eating","eats","ate","was eating"],
+["g","We ___ the museum last weekend; it was closed.","didn’t visit","don’t visit","aren’t visiting","weren’t visiting"],
+["g","The students ___ an English test at the moment.","are taking","take","took","were taking"],
+["g","When I saw Jenny, she ___ on the bridge.","was standing","stands","stood","is standing"],
+["g","Ancient people ___ vegetables on their farms.","grew","grow","are growing","were growing"],
+["g","___ you watch the football match yesterday?","Did","Do","Are","Were"],
+["g","Shh! The doctor ___ to the patient’s heartbeat now.","is listening","listens","listened","was listening"],
+["g","They ___ in London until 2017.","lived","live","are living","were living"],
+["g","While I ___ a book, my brother was playing the guitar.","was reading","read","am reading","reads"],
+["g","We ___ to school by coach every day.","go","are going","went","were going"],
+["g","A big lorry ___ under the bridge right now.","is going","goes","went","was going"],
+["g","The king ___ in a small and simple castle.","lived","lives","is living","was living"],
+["g","At 10:00 yesterday, they ___ on the mountain.","were walking","walk","are walking","walked"],
+["g","Did you ___ your keys in your wallet?","find","found","finding","finds"],
+["g","My father ___ his car on the fifth floor of the car park.","always parks","is always parking","parked","was parking"],
+["g","She ___ in the pool when she lost her watch.","was swimming","swam","is swimming","swims"],
+["g","Millions of people ___ in Istanbul today.","live","are living","lived","were living"],
+["g","I ___ a letter to my pen friend two days ago.","wrote","write","am writing","was writing"],
+["g","What ___ he ___ at the moment?","is / doing","does / do","did / do","was / doing"],
+["g","They ___ happy yesterday because their flight was late.","weren’t","aren’t","wasn’t","don’t"],
+["g","While the soldiers ___, the commander watched them.","were fighting","fought","fight","are fighting"],
+["g","The library ___ at 5 PM every weekday.","closes","is closing","closed","was closing"],
+["g","We ___ through the jungle when we saw a rare bird.","were walking","walk","are walking","walked"],
+["g","He ___ a camera yesterday; he bought a smartphone.","didn’t buy","doesn’t buy","wasn’t buying","isn’t buying"],
+["g","Look! The ferry ___ the port.","is leaving","leaves","left","was leaving"],
+["g","What ___ you ___ at 3 PM yesterday?","were / doing","are / doing","do / do","did / do"],
+["g","Ancient civilizations ___ goods by boat.","carried","carry","are carrying","were carrying"],
+["v","go","went","goed","gone","going"],
+["v","see","saw","seed","seen","seeing"],
+["v","buy","bought","buyed","buy","buying"],
+["v","take","took","taked","taken","taking"],
+["v","write","wrote","writed","written","writing"],
+["v","make","made","maked","make","making"],
+["v","have","had","haved","has","having"],
+["v","ride","rode","rided","ridden","riding"],
+["v","fight","fought","fighted","fight","fighting"],
+["v","build","built","builded","build","building"],
+["v","begin","began","beginned","begun","beginning"],
+["v","leave","left","leaved","leave","leaving"],
+["v","come","came","comed","come","coming"],
+["v","find","found","finded","find","finding"],
+["v","say","said","sayed","say","saying"],
+["v","know","knew","knowed","known","knowing"],
+["v","sleep","slept","sleeped","sleep","sleeping"],
+["v","fly","flew","flied","flown","flying"],
+["v","swim","swam","swimmed","swum","swimming"],
+["v","eat","ate","eated","eaten","eating"],
+["v","drink","drank","drinked","drunk","drinking"],
+["v","drive","drove","drived","driven","driving"],
+["v","run","ran","runned","run","running"],
+["v","give","gave","gived","given","giving"],
+["v","win","won","winned","win","winning"],
+["v","meet","met","meeted","meet","meeting"],
+["v","read","read","readed","reads","reading"],
+["v","wear","wore","weared","worn","wearing"],
+["v","fall","fell","falled","fallen","falling"],
+["v","become","became","becomed","become","becoming"],
+["d","A place where planes take off and land.","airport","port","train station","car park"],
+["d","A structure built over a river or road.","bridge","tower","cathedral","statue"],
+["d","A building where historic objects are kept and shown to people.","museum","theme park","airport","city square"],
+["d","A large boat that carries people and cars across water.","ferry","plane","lorry","coach"],
+["d","A comfortable bus used for long journeys.","coach","motorcycle","train","speedboat"],
+["d","A small book that gives information to tourists about a city.","guidebook","tissues","wallet","sunglasses"],
+["d","A large bag or case with a handle used for carrying clothes on a trip.","suitcase","wallet","camera","watch"],
+["d","A small, flat case used for carrying money and credit cards.","wallet","suitcase","tissues","guidebook"],
+["d","Dark glasses that protect your eyes from the sun.","sunglasses","camera","watch","map"],
+["d","A tall, narrow building or part of a castle.","tower","fountain","bridge","temple"],
+["d","A large, strong building built in the past by kings or lords.","castle","car park","museum","port"],
+["d","A tower with a bright light that warns and guides ships at sea.","lighthouse","statue","cathedral","city wall"],
+["d","A model of a person or animal made from stone or metal.","statue","fountain","temple","bridge"],
+["d","A structure from which water is pumped into the air for decoration or drinking.","fountain","tower","wall","castle"],
+["d","A building used for religious worship and prayers in ancient times.","temple","car park","theme park","station"],
+["d","A very large and important church.","cathedral","statue","castle","lighthouse"],
+["d","Walls built around an ancient city to protect it against attacks.","city walls","towers","bridges","monuments"],
+["d","An open area in the centre of a town or city, usually surrounded by buildings.","city square","port","airport","train station"],
+["d","A town or city with a harbour where ships load and unload goods.","port","desert","volcano","jungle"],
+["d","A large area of water surrounded by land.","lake","river","ocean","island"],
+["d","A piece of land completely surrounded by water.","island","mountain","waterfall","desert"],
+["d","A large, dry area of land with sand and very little rain.","desert","jungle","lake","river"],
+["d","A thick tropical forest with lots of trees and wild plants.","jungle","island","desert","mountain"],
+["d","A very high hill, much higher than the land around it.","mountain","valley","lake","river"],
+["d","A mountain with a large hole at the top that can explode with hot lava.","volcano","waterfall","island","desert"],
+["d","A place where water from a river falls down over rocks from a height.","waterfall","lake","sea","port"],
+["d","A natural wide flow of fresh water that goes across the land into the sea.","river","lake","island","desert"],
+["d","A large vehicle used for carrying heavy goods by road.","lorry","car","motorcycle","train"],
+["d","Objects like pots, plates, and bowls made out of wet clay and baked in heat.","pottery","monuments","chariots","statues"],
+["d","An open two-wheeled cart pulled by horses, used in ancient battles and races.","chariot","coach","boat","van"],
+["d","To chase and kill wild animals for food or sport.","go hunting","grow vegetables","build","explore"],
+["d","To plant seeds and take care of crops to produce food.","grow vegetables","make pottery","fight","sail"],
+["d","An open amusement area with rides, games, and attractions.","theme park","car park","train station","museum"],
+["d","Something you buy to help you remember a place you visited.","souvenir","chariot","tool","ticket"],
+["d","A person who buys and sells goods.","trader","sailor","warrior","commander"],
+["t","City square","Şehir meydanı","Şehir surları","Belediye binası","Çarşı"],
+["t","Lighthouse","Deniz feneri","Saat kulesi","Çeşme","Kale"],
+["t","Castle","Kale","Tapınak","Katedral","Heykel"],
+["t","Cathedral","Büyük kilise / Katedral","Saray","Mezar","Anıt"],
+["t","Statue","Heykel","Resim","Duvar","Çeşme"],
+["t","Fountain","Çeşme / Fıskiye","Köprü","Kule","Havuz"],
+["t","City wall","Şehir suru","Taş köprü","Liman","İstasyon"],
+["t","Temple","Tapınak","Şato","Tiyatro","Müze"],
+["t","Suitcase","Valiz / Bavul","Sırt çantası","Cüzdan","Rehber kitap"],
+["t","Guidebook","Rehber kitap","Roman","Harita","Sözlük"],
+["t","Wallet","Cüzdan","Anahtarlık","Gözlük","Saat"],
+["t","Sunglasses","Güneş gözlüğü","Büyüteç","Dürbün","Şapka"],
+["t","Train station","Tren istasyonu","Otobüs durağı","Havalimanı","Liman"],
+["t","Port","Liman","Gar","Havalimanı","Otopark"],
+["t","Car park","Otopark","Lunapark","Otogar","Benzinlik"],
+["t","Theme park","Eğlence / Tema parkı","Milli park","Botanik bahçe","Şehir parkı"],
+["t","Ferry","Feribot","Sürat teknesi","Yük gemisi","Sandal"],
+["t","Coach","Şehirlerarası otobüs","Minibüs","Taksi","Kamyon"],
+["t","Lorry","Kamyon","Tren","Motosiklet","Uçak"],
+["t","Speedboat","Sürat teknesi","Yelkenli","Feribot","Vapur"],
+["t","Waterfall","Şelale","Nehir","Yanardağ","Göl"],
+["t","Island","Ada","Çöl","Tepe","Orman"],
+["t","Desert","Çöl","Dağ","Nehir","Şelale"],
+["t","Jungle","Balta girmemiş orman / Cengel","Deniz kıyısı","Bozkır","Vadi"],
+["t","Volcano","Yanardağ","Deprem","Fırtına","Buzul"],
+["t","Lake","Göl","Deniz","Nehir","Okyanus"],
+["t","River","Nehir / Irmak","Göl","Ada","Şelale"],
+["t","Mountain","Dağ","Mağara","Tepe","Orman"],
+["t","Make pottery","Çömlek yapmak","Resim çizmek","Heykel yontmak","Yemek pişirmek"],
+["t","Ride chariots","At arabası (savaş arabası) sürmek","Bisiklete binmek","Gemiye binmek","Ata binmek"],
+["t","Fight against enemies","Düşmanlara karşı savaşmak","Hayvan avlamak","Barış yapmak","Şehir kurmak"],
+["t","Go hunting","Avlanmaya gitmek","Balık tutmak","Yüzmeye gitmek","Ağaç dikmek"],
+["t","Grow vegetables","Sebze yetiştirmek","Meyve toplamak","Yemek satmak","Çiftlik almak"],
+["t","Build monuments","Anıtlar inşa etmek","Duvar örmek","Köprü yapmak","Yol açmak"],
+["t","Carry goods by boat","Malları/eşyaları tekneyle taşımak","Tekneyle gezintiye çıkmak","Tekne inşa etmek","Balık avlamak"],
+["g","Listen! The guide ___ about the history of the cathedral.","is talking","talks","talked","was talking"],
+["g","Ancient kings usually ___ big monuments for their glory.","built","build","are building","were building"],
+["g","What time ___ the next train to Oxford leave?","does","do","is","did"],
+["g","While we ___ in the sea, we saw a small island.","were swimming","swim","are swimming","swam"],
+["g","I ___ my camera in my suitcase two hours ago.","put","am putting","puts","was putting"],
+["g","Susan always ___ at the same hotel when she visits Edinburgh.","stays","is staying","stayed","was staying"],
+["g","They ___ against enemies when the commander arrived.","were fighting","fight","are fighting","fought"],
+["g","Don’t speak loudly! The students ___ their exam.","are taking","take","took","were taking"],
+["g","We ___ on holiday last summer because we didn’t have time.","didn’t go","aren’t","don’t go","wasn’t"],
+["g","At 3 PM yesterday, Tom ___ a book in his bedroom.","was reading","read","is reading","reads"],
+["g","How ___ you usually ___ to school?","do / go","are / going","did / go","were / going"],
+["g","While the tourists ___ the ruins, it started to rain.","were exploring","explore","are exploring","explored"],
+["g","Henry VII ___ the king of England until 1509.","was","is","were","did"],
+["g","Look at that lorry! It ___ very fast.","is driving","drives","drove","was driving"],
+["g","The ancient people ___ on leather.","wrote","write","are writing","were writing"],
+["g","Where ___ they ___ when you called them?","were / going","do / go","are / going","did / go"],
+["g","My father ___ by ferry every morning to work.","travels","is travelling","travelled","was travelling"],
+["g","She ___ in the library when the fire alarm rang.","was studying","studies","is studying","studied"],
+["g","___ there any rivers in Rio de Janeiro?","Are","Is","Was","Were"],
+["g","We ___ to the top of the mountain yesterday.","didn’t climb","don’t climb","aren’t climbing","weren’t climbing"],
+["g","Right now, I ___ at a cafe and drinking coffee.","am sitting","sit","sat","was sitting"],
+["g","When they ___ the waterfall, the sun was shining.","saw","see","were seeing","are seeing"],
+["g","He ___ his sunglasses yesterday; he bought a watch.","didn’t lose","doesn’t lose","wasn’t losing","isn’t losing"],
+["g","At 9 o’clock last night, what ___ she ___?","was / doing","does / do","is / doing","did / do"],
+["g","The lighthouse ___ ships safely for over a hundred years.","guides","guide","is guiding","was guiding"],
+["g","While I ___ my bags, my sister called a taxi.","was packing","pack","am packing","packed"],
+["g","The children ___ in the garden at the moment.","are playing","play","played","were playing"],
+["g","Ancient Greeks ___ a huge statue of Helios in Rhodes.","built","build","are building","were building"],
+["g","___ you at home at 9 o’clock yesterday morning?","Were","Are","Was","Did"],
+["g","While the farmer ___ vegetables, his children were playing.","was growing","grew","grows","is growing"],
+["g","Where ___ your sister spend her summers?","does","do","is","did"],
+["g","They ___ goods by boat when the storm started.","were carrying","carry","are carrying","carried"],
+["g","Neil Armstrong ___ to the Moon in 1969.","went","goes","is going","was going"],
+["g","The baby ___ when the loud music woke him up.","was sleeping","sleeps","is sleeping","slept"],
+["g","We usually ___ by train because it is cheap and comfortable.","travel","are travelling","travelled","were travelling"],
+["v","bring","brought","bringed","bring","bringing"],
+["v","catch","caught","catched","catch","catching"],
+["v","choose","chose","choosed","chosen","choosing"],
+["v","cost","cost","costed","costs","costing"],
+["v","cut","cut","cutted","cuts","cutting"],
+["v","do","did","doed","done","doing"],
+["v","draw","drew","drawed","drawn","drawing"],
+["v","feel","felt","feeled","feel","feeling"],
+["v","forget","forgot","forgetted","forgotten","forgetting"],
+["v","hear","heard","heared","hear","hearing"],
+["v","hide","hid","hided","hidden","hiding"],
+["v","hit","hit","hitted","hits","hitting"],
+["v","hold","held","holded","hold","holding"],
+["v","pay","paid","payed","pay","paying"],
+["v","put","put","putted","puts","putting"],
+["v","ring","rang","ringed","rung","ringing"],
+["v","sell","sold","selled","sell","selling"],
+["v","send","sent","sended","send","sending"],
+["v","sing","sang","singed","sung","singing"],
+["v","teach","taught","teached","teach","teaching"],
+["d","A person who fights in an army or a war.","warrior","sailor","trader","doctor"],
+["d","A two-wheeled vehicle that you ride, powered by an engine.","motorcycle","bicycle","lorry","train"],
+["d","A small, fast motorboat used on water.","speedboat","ferry","coach","plane"],
+["d","A person who works on a boat or ship.","sailor","trader","warrior","king"],
+["d","Soft paper used for wiping your nose or face.","tissues","wallet","guidebook","map"],
+["d","Coins and paper notes used to buy things.","money","cards","souvenirs","tickets"],
+["d","A device used for taking photographs.","camera","watch","mobile phone","laptop"],
+["d","A small clock that you wear on your wrist.","watch","sunglasses","camera","wallet"],
+["d","A drawing of an area that shows rivers, roads, and cities.","map","guidebook","tissues","suitcase"],
+["d","Made of wood.","wooden","stone","metal","golden"],
+["d","A high-ranking officer who leads an army.","commander","warrior","sailor","trader"],
+["d","Having no fear; very brave.","fearless","clumsy","tired","lazy"],
+["d","A structure or statue built to remind people of a famous person or event.","monument","car park","port","theme park"],
+["d","An area of sand or small stones beside the sea or a lake.","beach","desert","jungle","mountain"],
+["d","To go around an area to learn about it and find new things.","explore","fight","build","carry"],
+["d","The land along the edge of a river.","riverside","island","desert","waterfall"],
+["d","What you can see from a particular place.","view","map","camera","souvenir"],
+["d","An area of land used for growing crops or keeping animals.","farm","castle","port","station"],
+["d","A place where you pay to leave your car for a while.","car park","airport","theme park","city square"],
+["d","A violent shaking of the earth’s surface.","earthquake","storm","rain","fire"],
+["t","Warrior","Savaşçı","Tüccar","Denizci","Çiftçi"],
+["t","Sailor","Denizci / Gemici","Komutan","Kral","Asker"],
+["t","Trader","Tüccar","Sanatçı","Savaşçı","Avcı"],
+["t","Wooden","Ahşap / Tahtadan yapılmış","Taş","Metal","Altın"],
+["t","Commander","Komutan","Asker","Prens","Doktor"],
+["t","Fearless","Korkusuz / Cesur","Korkak","Yorgun","Zayıf"],
+["t","Monument","Anıt / Abide","Köprü","Kule","Tapınak"],
+["t","Motorcycle","Motosiklet","Bisiklet","Kamyon","Tren"],
+["t","Tissues","Mendil / Kağıt mendil","Islak havlu","Cüzdan","Bilet"],
+["t","Map","Harita","Rehber","Resim","Kartvizit"],
+["t","Watch (noun)","Kol saati","Gözlük","Pusula","Anahtar"],
+["t","Mobile phone","Cep telefonu","Dizüstü bilgisayar","Fotoğraf makinesi","Kulaklık"],
+["t","Camera","Kamera / Fotoğraf makinesi","Televizyon","Telefon","Saat"],
+["t","Money","Para","Fatura","Kredi kartı","Cüzdan"],
+["t","Beach","Sahil / Plaj","Göl","Ada","Çöl"],
+["t","Sea","Deniz","Nehir","Şelale","Vadi"],
+["t","Explore","Keşfetmek","İnşa etmek","Savaşmak","Avlamak"],
+["t","Riverside","Nehir kenarı","Dağ eteği","Deniz kıyısı","Orman içi"],
+["t","View","Manzara / Görünüm","Harita","Rehber","Anıt"],
+["t","Souvenir","Hediyelik eşya","Antika","Bilet","Giysi"],
+["t","Farm","Çiftlik","Köy","Kasaba","Tarla"],
+["t","Earthquake","Deprem","Fırtına","Yangın","Sel"],
+["t","Plane","Uçak","Gemi","Tren","Otobüs"],
+["t","Bridge","Köprü","Kale","Kule","Sur"],
+["t","Museum","Müze","Kütüphane","Tiyatro","Sinema"]];
+const TAG={g:'✏️ Fill in the Blank',v:'⏪ Past Form (V2)',d:'📖 Definition',t:'🇹🇷 Turkish Meaning'};
+const CARDS=[
+{e:'🚀',t:'Rocket!',d:'Move 3 spaces forward!',m:3},{e:'🛼',t:'Roller Skates',d:'Move 2 spaces forward!',m:2},{e:'☁️',t:'Fluffy Cloud',d:'Move 1 space forward. No question!',m:1},
+{e:'🎈',t:'Balloon Ride',d:'Move 2 spaces forward!',m:2},{e:'🍌',t:'Banana Peel!',d:'Slip back 2 spaces!',m:-2},{e:'🌪️',t:'Headwind',d:'Move 1 space back.',m:-1},
+{e:'🐌',t:'Snail Mode',d:'Move 1 space back.',m:-1},{e:'🧩',t:'Tough Challenge!',d:'Answer 2 questions. Each mistake = 1 space back!',q:2},
+{e:'🔥',t:'Super Challenge!',d:'Answer 3 questions. Each mistake = 1 space back!',q:3}];
+let n=2,rows=ANIMALS.slice(0,8).map((e,i)=>({e,n:NAMES[i]})),P=[],cur=0,deck=[],cdeck=[],tiles=[],V=false,B,mid;
+/* splash */
+(function(){const L=$('#sl');
+ L.innerHTML=[...'LANGUAGE'].map((c,i)=>{const d=.2+i*.09;return `<span style="animation-delay:${d}s,${d+1.3}s">${c}</span>`}).join('')+'<br>'+[...'RUSH'].map((c,i)=>{const d=1+i*.1;return `<span style="color:#ff5d8f;animation-delay:${d}s,${d+1.3}s">${c}</span>`}).join('');
+ const F=$('#fl'),E=['🐱','🐶','🐰','🦊','🐼','🐸','🎲','⭐','🏁','☁️','🎈','🦁'];
+ E.forEach((e,i)=>{const x=document.createElement('span');x.textContent=e;x.style.left=(4+(i*83)%90)+'%';x.style.top=(8+(i*47)%78)+'%';x.style.fontSize=(26+(i*7)%22)+'px';x.style.animationDelay=(i*.55)+'s';x.style.animationDuration=(6+(i%4))+'s';F.append(x)});
+ setTimeout(()=>$('#menu').hidden=false,2100)})();
+$('#play').onclick=()=>{initAudio();S.ok();$('#splash').hidden=true;$('#setup').hidden=false;drawSetup()};
+/* setup */
+function drawSetup(){
+ const seen=new Set();rows.forEach((r,i)=>{if(i<n){if(seen.has(r.e))r.e=ANIMALS.find(a=>!rows.slice(0,n).some(x=>x.e==a));seen.add(r.e)}});
+ $('#cnt').textContent=n;$('#rows').innerHTML='';
+ rows.slice(0,n).forEach(r=>{const d=document.createElement('div');d.className='row';
+  const b=document.createElement('button');b.className='eb';b.textContent=r.e;
+  b.onclick=()=>{const u=new Set(rows.slice(0,n).map(x=>x.e));let k=ANIMALS.indexOf(r.e);do{k=(k+1)%ANIMALS.length}while(u.has(ANIMALS[k]));r.e=ANIMALS[k];b.textContent=r.e;S.pop()};
+  const inp=document.createElement('input');inp.value=r.n;inp.maxLength=12;inp.oninput=()=>r.n=inp.value;
+  d.append(b,inp);$('#rows').append(d)});
+}
+$('#mn').onclick=()=>{if(n>2){n--;S.pop();drawSetup()}};$('#pl').onclick=()=>{if(n<8){n++;S.pop();drawSetup()}};
+$('#go').onclick=start;
+/* board */
+const XY=i=>{const [x,y]=i<=5?[i+1,0]:i==6?[6,1]:i<=12?[13-i,2]:[0,2];return V?[y,x]:[x,y]};
+function layout(){
+ const v=innerHeight>innerWidth*1.1,desk=!v&&innerWidth>=700,
+  z=desk?Math.max(1,Math.min(innerHeight/760,innerWidth/1000,1.6)):1;
+ document.documentElement.style.setProperty('--z',z);
+ if(B){V=v;B.classList.toggle('v',v);
+  let sz;
+  if(v){const w=Math.min(innerWidth*.96,520);sz=Math.max(40,Math.min(w*.22,(innerHeight-250)/7))}
+  else sz=Math.max(36,Math.min((innerWidth*.96-52)/7,(innerHeight-132*z-90)/3,240));
+  B.style.setProperty('--s',sz+'px');
+  tiles.forEach((t,i)=>{const [x,y]=XY(i);t.style.gridColumn=x+1;t.style.gridRow=y+1});
+  v?mid.append($('#panel')):$('#game').insertBefore($('#panel'),$('#roster'))}
+}
+addEventListener('resize',layout);layout();
+function start(){
+ P=rows.slice(0,n).map(r=>({e:r.e,n:r.n.trim()||'Player',pos:0,passes:PASSES}));cur=0;
+ $('#setup').hidden=true;$('#game').hidden=false;
+ B=$('#board');B.innerHTML='';tiles=[];
+ for(let i=0;i<=13;i++){const t=document.createElement('div');
+  t.className='tile'+(i==0?' s0':i==13?' f':CH.includes(i)?' c':i%2?'':' o');
+  t.innerHTML=(i>0&&i<13?`<span class="nb">${i}</span>`:'')+(i>0&&i<13?`<span class="mk">${CH.includes(i)?'★':'?'}</span>`:'')+(i==0?'<span class="lb">START</span>':i==13?'<span class="lb">FINISH</span>':'')+'<div class="tk"></div>';
+  B.append(t);tiles.push(t)}
+ mid=document.createElement('div');mid.className='mid';mid.innerHTML='<div class="logo">LANGUAGE <b>RUSH</b></div>';B.append(mid);
+ layout();S.pop();render();turn();
+}
+function render(){
+ const g={};P.forEach((p,i)=>(g[p.pos]=g[p.pos]||[]).push(i));
+ tiles.forEach((t,i)=>{const k=t.querySelector('.tk'),l=g[i]||[];k.className='tk '+(l.length>4?'c9':l.length>1?'c4':'c1');
+  k.innerHTML=l.map(j=>`<span class="em${j==cur?' me':''}">${P[j].e}</span>`).join('')});
+ $('#roster').innerHTML=P.map((p,i)=>`<span class="chip${i==cur?' on':''}">${p.e} ${esc(p.n)} · ${p.pos==0?'START':p.pos==13?'🏁':p.pos}</span>`).join('');
+}
+async function moveTo(p,t,back){t=Math.max(0,Math.min(13,t));while(p.pos!=t){p.pos+=p.pos<t?1:-1;render();back?S.boing():S.step();await sleep(back?260:380)}}
+/* overlay */
+const ov=$('#ov'),SC=ov.querySelector('.scene'),QA=ov.querySelector('.qa');
+const openOv=h=>{SC.innerHTML=h||'';QA.innerHTML='';ov.hidden=false};
+const closeOv=()=>{ov.hidden=true;SC.innerHTML='';QA.innerHTML=''};
+const wait=l=>new Promise(r=>{QA.innerHTML=`<button class="btn g">${l}</button>`;QA.firstChild.onclick=()=>{S.pop();r()}});
+function ask(p){return new Promise(res=>{
+ if(!deck.length)deck=shuf(QS.map((_,i)=>i));
+ const q=QS[deck.pop()],o=shuf(q.slice(2));
+ const text=q[0]=='t'?`What does “${q[1]}” mean in Turkish?`:q[0]=='v'?`What is the past form of “${q[1]}”?`:q[1];
+ QA.innerHTML=`<div class="qh"><span>${p.e} ${esc(p.n)}</span><span class="tm" id="tm">20</span></div><div class="bar"><i id="bi"></i></div><span class="tag">${TAG[q[0]]}</span><div class="qt">${text}</div><div class="opts">${o.map(x=>`<button class="opt">${x}</button>`).join('')}</div><button class="btn pass${p.passes>0?'':' pen'}" id="pass">${p.passes>0?`⏭ Pass (${p.passes} free left)`:'✖ Pass (counts as wrong)'}</button><div class="fb" id="fb"></div>`;
+ const bs=[...QA.querySelectorAll('.opt')];let done=false,last=21;const t0=Date.now();
+ const fin=i=>{if(done)return;done=true;clearInterval(iv);
+  bs.forEach(b=>{b.disabled=true;if(b.textContent==q[2])b.classList.add('ok')});$('#pass').disabled=true;
+  const ps=i==-2,gv=i==-3,ok=i>=0&&bs[i].textContent==q[2];if(i>=0&&!ok)bs[i].classList.add('no');
+  if(ps){p.passes--;$('#fb').innerHTML='<span style="color:#6c5ce7">Passed! ⏭️ No penalty.</span>';S.pop()}
+  else if(gv){$('#fb').innerHTML='<span class="bad">Passed ✖ Counts as wrong.</span>';S.no()}
+  else{$('#fb').innerHTML=ok?'<span class="good">Correct! 🎉</span>':`<span class="bad">${i<0?'Time’s up! ⏰':'Oops! 😿'}</span>`;ok?S.ok():S.no()}
+  setTimeout(()=>res(ps?'pass':ok),ps?1500:1300)};
+ $('#pass').onclick=()=>fin(p.passes>0?-2:-3);
+ bs.forEach((b,i)=>b.onclick=()=>{S.tick();fin(i)});
+ const iv=setInterval(()=>{const l=Math.max(0,20-(Date.now()-t0)/1000),c=Math.ceil(l);$('#tm').textContent=c;if(c<last){last=c;if(c<=5&&c>0)S.warn()}
+  const bi=$('#bi');bi.style.width=l*5+'%';bi.style.background=l<6?'#ff5d5d':'#2ecc71';if(l<=0)fin(-1)},100);
+})}
+async function chance(p){
+ if(!cdeck.length)cdeck=shuf(CARDS);const c=cdeck.pop();
+ S.card();openOv(`<div class="cardbox"><div>${c.e}</div><h3>Chance: ${c.t}</h3><p class="${c.m>0?'good':'bad'}">${c.d}</p></div>`);
+ await wait('Got it!');
+ if(c.m){closeOv();await moveTo(p,p.pos+c.m,c.m<0)}
+ else{let w=0;for(let k=0;k<c.q;k++){SC.innerHTML=`<div style="font-weight:700">🧩 Challenge ${k+1}/${c.q}</div>`;if(await ask(p)===false)w++}
+  closeOv();if(w)await moveTo(p,p.pos-w,true)}
+}
+const tween=(ms,f)=>new Promise(r=>{const t0=performance.now();(function s(t){const k=Math.min(1,(t-t0)/ms);f(k);k<1?requestAnimationFrame(s):r()})(t0)});
+async function finale(p){
+ openOv(`<div class="fin"><h3>🏁 FINAL QUESTION!</h3><svg id="sv" viewBox="0 0 340 160"><line x1="130" y1="4" x2="130" y2="12" stroke="#2d1e4f" stroke-width="8"/><line x1="130" y1="148" x2="130" y2="156" stroke="#2d1e4f" stroke-width="8"/><path id="tp" fill="none" stroke="#ff5d8f" stroke-width="7" stroke-linejoin="round"/><path id="tq" fill="none" stroke="#ff5d8f" stroke-width="7" stroke-linecap="round"/><text id="me" y="105" font-size="62">${p.e}</text></svg><div style="font-weight:700">The finish tape is stretching…</div></div>`);
+ const tp=$('#tp'),tq=$('#tq'),me=$('#me'),sv=$('#sv');
+ const draw=vx=>{tp.setAttribute('d',`M130,8 L${vx},80 L130,152`);me.setAttribute('x',vx+2)};
+ draw(130);S.stretch();await tween(1800,k=>draw(130-85*(k*k*(3-2*k))));sv.classList.add('sh');
+ const ok=await ask(p);sv.classList.remove('sh');
+ if(ok==='pass'){await tween(450,k=>draw(45+85*k));await sleep(300);closeOv();return false}
+ if(ok===true){S.snap();tp.setAttribute('d','');await tween(900,k=>{tq.setAttribute('d',`M130,8 Q${130-60*k},${8-20*k} ${100-70*k},-10M130,152 Q${130-60*k},${152+20*k} ${100-70*k},170`);me.setAttribute('x',45-330*k)})}
+ else{S.boing();await tween(450,k=>draw(45+85*k));await sleep(300)}
+ closeOv();if(!ok)await moveTo(p,10,true);return ok;
+}
+function win(p){
+ S.win();openOv(`<div class="cardbox"><div>🏆</div><h3>${p.e} ${esc(p.n)} wins!</h3><p>Snapped the finish tape! 🎉</p></div>`);
+ QA.innerHTML='<button class="btn g">Play Again</button>';QA.firstChild.onclick=()=>location.reload();
+ for(let i=0;i<24;i++){const s=document.createElement('span');s.className='cf';s.textContent=['🎉','⭐','🎊',p.e][i%4];s.style.left=Math.random()*95+'%';s.style.animationDelay=Math.random()*3+'s';document.body.append(s)}
+}
+async function turn(){
+ const p=P[cur],b=$('#rollBtn'),d=$('#dice');render();
+ $('#who').innerHTML=`${p.e} ${esc(p.n)}’s turn`;d.textContent='?';b.hidden=false;
+ await new Promise(r=>b.onclick=r);b.hidden=true;
+ d.classList.add('rl');for(let i=0;i<10;i++){d.textContent=1+Math.random()*3|0;S.tick();await sleep(80)}
+ const r=1+Math.random()*3|0;d.textContent=r;d.classList.remove('rl');S.pop();await sleep(400);
+ await moveTo(p,p.pos+r);
+ if(p.pos<13){if(CH.includes(p.pos))await chance(p);
+  else{openOv();const ok=await ask(p);closeOv();if(ok===false)await moveTo(p,p.pos-1,true)}}
+ if(p.pos==13&&await finale(p))return win(p);
+ cur=(cur+1)%P.length;turn();
+}
+</script></body></html>

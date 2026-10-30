@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9/9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF6E6;
+    --ink:#1A1A1A;
+    --red:#FF3B30;
+    --blue:#2867FF;
+    --yellow:#FFC93C;
+    --green:#17B978;
+    --purple:#9B5DE5;
+    --orange:#FF8C42;
+    --pink:#FF5C8A;
+    --teal:#12B5B0;
+    --burst: polygon(50% 2%, 59.3% 21.5%, 78.2% 11.2%, 74.3% 32.4%, 95.6% 35.2%, 80% 50%, 95.6% 64.8%, 74.3% 67.6%, 78.2% 88.8%, 59.3% 78.5%, 50% 98%, 40.7% 78.5%, 21.8% 88.8%, 25.7% 67.6%, 4.4% 64.8%, 20% 50%, 4.4% 35.2%, 25.7% 32.4%, 21.8% 11.2%, 40.7% 21.5%);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink);
+    background-color: var(--paper);
+    background-image: radial-gradient(rgba(26,26,26,0.07) 1.6px, transparent 1.6px);
+    background-size: 16px 16px;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .screen{
+    display:none;
+    min-height:100vh;
+    width:100%;
+    position:relative;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 16px 40px;
+  }
+  .screen.active{display:flex;}
+
+  h1,h2,h3{font-family:'Bangers'; font-weight:400; letter-spacing:1px; margin:0;}
+
+  /* ---- burst / comic pow shape, reusable ---- */
+  .burst-wrap{position:relative; display:inline-flex; align-items:center; justify-content:center;}
+  .burst-outline, .burst-color{position:absolute; inset:-4%; clip-path: var(--burst);}
+  .burst-outline{background:var(--ink);}
+  .burst-color{inset:0; background:var(--red);}
+  .burst-content{position:relative; z-index:2; display:flex; align-items:center; justify-content:center; width:100%; height:100%;}
+
+  /* ---- comic buttons ---- */
+  .btn{
+    font-family:'Baloo 2'; font-weight:800; font-size:1.05rem;
+    border:4px solid var(--ink); border-radius:14px;
+    padding:14px 30px; background:var(--yellow); color:var(--ink);
+    box-shadow:6px 6px 0 var(--ink);
+    cursor:pointer; transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:hover{transform:translate(-1px,-1px); box-shadow:7px 7px 0 var(--ink);}
+  .btn:active{transform:translate(4px,4px); box-shadow:1px 1px 0 var(--ink);}
+  .btn.btn-green{background:var(--green);}
+  .btn.btn-red{background:var(--red); color:#fff;}
+  .btn.btn-orange{background:var(--orange);}
+  .btn.btn-ghost{background:var(--paper);}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .panel{
+    background:var(--paper); border:5px solid var(--ink); border-radius:22px;
+    box-shadow:10px 10px 0 var(--ink); padding: 30px 26px; max-width: 560px; width:100%;
+  }
+
+  /* ---------- START ---------- */
+  #screen-start .logo-badge{width:min(56vw,260px); height:min(56vw,260px); transform:rotate(-6deg); margin-bottom: 18px;}
+  #screen-start .logo-badge .burst-content{transform:rotate(6deg);}
+  #screen-start .logo-text{font-family:'Bangers'; font-size:min(18vw, 84px); color:var(--paper); text-shadow:3px 3px 0 var(--ink); letter-spacing:2px;}
+  .tagline{font-weight:700; text-align:center; max-width:420px; margin: 4px 0 26px; font-size:1.05rem; opacity:.85;}
+  .top-right-credit{
+    position:fixed; top:6px; right:10px; z-index:100; pointer-events:none;
+    font-weight:700; font-size:.68rem; opacity:.6; letter-spacing:.4px;
+  }
+  .mode-select{display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:320px;}
+  .mode-select .btn{width:100%; text-align:center;}
+  .mode-sub{font-size:.72rem; font-weight:700; opacity:.6; margin:-8px 0 0;}
+
+  /* ---------- WORD SOURCE ---------- */
+  .btn.btn-purple{background:var(--purple); color:#fff;}
+  .source-list{display:flex; flex-direction:column; gap:16px; margin:22px 0 18px; width:100%;}
+  .src-btn{display:flex; flex-direction:column; align-items:center; gap:2px; width:100%; text-align:center;}
+  .src-title{font-family:'Bangers'; font-size:1.7rem; letter-spacing:1px; font-weight:400;}
+  .src-desc{font-size:.82rem; font-weight:700; opacity:.85;}
+  .source-sub{font-weight:700; opacity:.75; margin:8px 0 0;}
+
+  /* ---------- AUDIO TOGGLES ---------- */
+  .audio-toggles{position:fixed; right:12px; bottom:12px; z-index:90; display:flex; gap:10px;}
+  .tgl{
+    position:relative; width:46px; height:46px; border:3px solid var(--ink); border-radius:50%;
+    background:var(--yellow); box-shadow:3px 3px 0 var(--ink); font-size:1.25rem; line-height:1;
+    cursor:pointer; padding:0; transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .tgl:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink);}
+  .tgl.off{background:#ddd; opacity:.8;}
+  .tgl.off::after{content:''; position:absolute; left:6px; right:6px; top:50%; height:4px; background:var(--red); border:2px solid var(--ink); border-radius:3px; transform:rotate(-40deg);}
+
+  /* ---------- MINEFIELD SWITCH ---------- */
+  .mine-switch{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%;
+    border:4px solid var(--ink); border-radius:14px; background:#fff; padding:12px 16px;
+    box-shadow:5px 5px 0 var(--ink); cursor:pointer; text-align:left; margin-bottom:18px;
+  }
+  .mine-switch .ms-title{font-family:'Bangers'; font-size:1.3rem; letter-spacing:1px; line-height:1.1;}
+  .mine-switch .ms-desc{font-size:.76rem; font-weight:700; opacity:.75; line-height:1.25; margin-top:2px;}
+  .mine-switch input{position:absolute; opacity:0; pointer-events:none;}
+  .ms-track{
+    position:relative; flex:0 0 62px; height:32px; border:3px solid var(--ink); border-radius:20px;
+    background:#ddd; transition:background .2s;
+  }
+  .ms-track::after{
+    content:''; position:absolute; box-sizing:border-box; top:3px; left:3px; width:20px; height:20px; border-radius:50%;
+    background:#fff; border:3px solid var(--ink); transition:transform .2s;
+  }
+  .mine-switch input:checked ~ .ms-track{background:var(--red);}
+  .mine-switch input:checked ~ .ms-track::after{transform:translateX(30px);}
+  .mine-switch:has(input:checked){background:#FFE3DF;}
+
+  /* ---------- MINE REVEAL ---------- */
+  .mine-banner{display:none; font-family:'Bangers'; font-size:2rem; letter-spacing:2px; color:var(--red); text-shadow:2px 2px 0 var(--ink); line-height:1;}
+  .mine-banner small{display:block; font-family:'Baloo 2'; font-weight:800; font-size:.85rem; letter-spacing:0; color:var(--yellow); text-shadow:none; margin-top:6px;}
+  .reveal-card.mine{
+    background:#22101A; color:var(--paper); border-color:var(--yellow);
+    box-shadow:0 0 0 5px var(--ink), 10px 10px 0 5px var(--ink), 0 0 46px rgba(255,59,48,.75);
+    animation: mineShake .55s ease;
+  }
+  .reveal-card.mine .mine-banner{display:block; margin-bottom:6px;}
+  .reveal-card.mine .reveal-word{color:var(--yellow); text-shadow:3px 3px 0 var(--red);}
+  @keyframes mineShake{
+    0%{transform:scale(.3); opacity:0;} 25%{transform:scale(1.12) rotate(-3deg); opacity:1;}
+    40%{transform:translateX(-10px) rotate(2deg);} 55%{transform:translateX(10px) rotate(-2deg);}
+    70%{transform:translateX(-6px);} 85%{transform:translateX(6px);} 100%{transform:none;}
+  }
+  .mine-flash{position:fixed; inset:0; z-index:65; pointer-events:none; background:radial-gradient(circle, #fff 0%, var(--yellow) 30%, var(--red) 70%); animation:mineFlash .6s ease-out forwards;}
+  @keyframes mineFlash{0%{opacity:.95;} 100%{opacity:0;}}
+  .card .mine-mark{font-size:1rem; display:block;}
+
+  /* ---------- COUNT ---------- */
+  .count-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin: 20px 0 26px; width:100%; max-width:420px;}
+  .count-chip{
+    font-family:'Bangers'; font-size:1.8rem; text-align:center; padding:14px 0;
+    border:4px solid var(--ink); border-radius:14px; background:#fff; cursor:pointer;
+    box-shadow:4px 4px 0 var(--ink); transition:.08s;
+  }
+  .count-chip:hover{transform:translateY(-2px);}
+  .count-chip.selected{background:var(--blue); color:#fff; transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink);}
+
+  /* ---------- ORDER ---------- */
+  #orderChips{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:560px; margin: 22px 0;}
+  .order-chip{
+    position:relative; width:112px; height:112px; border:4px solid var(--ink); border-radius:16px;
+    display:flex; align-items:center; justify-content:center; font-family:'Bangers'; font-size:1.1rem;
+    box-shadow:5px 5px 0 var(--ink); color:#fff; text-align:center; padding:6px;
+  }
+  .order-chip .rank{
+    display:none; position:absolute; top:-14px; left:-14px; width:38px; height:38px;
+  }
+  .order-chip .rank .burst-content{font-family:'Bangers'; font-size:1.1rem; color:var(--ink);}
+  .order-chip.revealed .rank{display:flex;}
+
+  /* ---------- GAME ---------- */
+  #screen-game{justify-content:flex-start; padding-top:30px;}
+  .game-top{width:100%; max-width:680px; display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .mini-logo{font-family:'Bangers'; font-size:1.6rem;}
+  .scoreboard{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:680px; width:100%; margin-bottom:14px;}
+  .score-chip{
+    border:3px solid var(--ink); border-radius:10px; padding:5px 10px; font-weight:700; font-size:.82rem;
+    background:#fff; opacity:.55; transition:.2s;
+  }
+  .score-chip.active-turn{opacity:1; transform:scale(1.08); box-shadow:3px 3px 0 var(--ink);}
+
+  .turn-banner{
+    font-family:'Bangers'; font-size:1.4rem; text-align:center; padding:10px 20px; border:4px solid var(--ink);
+    border-radius:14px; box-shadow:5px 5px 0 var(--ink); margin-bottom:18px; color:#fff;
+  }
+
+  .game-board{display:flex; gap:22px; align-items:flex-start; justify-content:center; flex-wrap:wrap; width:100%; max-width:680px;}
+
+  #cardGrid{
+    display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;
+    width:100%; max-width:460px;
+  }
+  .card{
+    aspect-ratio:1; border:4px solid var(--ink); border-radius:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    box-shadow:5px 5px 0 var(--ink); transition: transform .15s ease;
+    background-image: radial-gradient(rgba(255,255,255,.35) 2px, transparent 2px);
+    background-size:10px 10px;
+    text-align:center; padding:4px;
+  }
+  .card:hover{transform:translateY(-4px) rotate(-1deg);}
+  .card .qmark{font-family:'Bangers'; font-size:2.4rem; color:#fff; text-shadow:2px 2px 0 var(--ink);}
+  .card .card-word{font-family:'Baloo 2'; font-weight:800; color:#fff; font-size:.82rem; text-shadow:1px 1px 0 var(--ink);}
+  .card.removing{animation: popOut .3s ease forwards;}
+  @keyframes popOut{ to{ transform:scale(0); opacity:0; } }
+  @keyframes dealIn{ from{ transform:scale(.3) rotate(8deg); opacity:0;} to{ transform:scale(1) rotate(0); opacity:1;} }
+  .card.dealt{animation: dealIn .35s ease backwards;}
+
+  /* ---------- HOT DECK ---------- */
+  .hot-deck-wrap{display:none; flex-direction:column; align-items:center; gap:10px; width:130px;}
+  .hot-deck-stack{
+    width:100px; height:130px; border:4px solid var(--ink); border-radius:14px;
+    background:linear-gradient(135deg,var(--red),var(--orange));
+    box-shadow:5px 5px 0 var(--ink), 9px 9px 0 rgba(26,26,26,.28);
+    display:flex; align-items:center; justify-content:center; font-size:2.4rem;
+    position:relative;
+  }
+  .hot-deck-label{font-family:'Bangers'; font-size:.95rem; text-align:center;}
+  .hot-deck-count{font-weight:700; font-size:.78rem; opacity:.7; text-align:center;}
+
+  /* ---------- REVEAL MODAL ---------- */
+  #revealOverlay{
+    position:fixed; inset:0; background:rgba(20,16,10,.55); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  #revealOverlay.active{display:flex;}
+  .reveal-card{
+    background:var(--paper); border:5px solid var(--ink); border-radius:22px; box-shadow:10px 10px 0 var(--ink);
+    padding: 34px 26px; max-width:420px; width:100%; text-align:center;
+    animation: growIn .28s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes growIn{ from{ transform:scale(.3); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .reveal-word{font-family:'Bangers'; font-size:2.6rem; letter-spacing:1px; margin: 6px 0 16px; word-break:break-word;}
+  .reveal-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+
+  .timer-wrap{margin:0 0 20px;}
+  .timer-bar-track{width:100%; height:12px; border:3px solid var(--ink); border-radius:8px; background:#fff; overflow:hidden;}
+  .timer-bar-fill{height:100%; width:100%; background:var(--green); transition:width 1s linear, background .3s;}
+  .timer-num{font-family:'Bangers'; margin-top:6px; font-size:1.1rem;}
+
+  /* ---------- HOT CARD MODAL ---------- */
+  #hotCardOverlay{
+    position:fixed; inset:0; background:rgba(20,16,10,.6); display:none;
+    align-items:center; justify-content:center; z-index:55; padding:20px;
+  }
+  #hotCardOverlay.active{display:flex;}
+  .hot-card{max-width:420px; width:100%; text-align:center; animation: growIn .28s cubic-bezier(.2,.8,.2,1);}
+  .hot-card-badge{
+    display:inline-block; font-family:'Bangers'; font-size:1.1rem; color:#fff;
+    padding:6px 18px; border-radius:10px; border:3px solid var(--ink); box-shadow:3px 3px 0 var(--ink);
+  }
+  .hot-card-title{font-size:1.7rem; margin:14px 0 4px;}
+  .hot-card-sub{font-style:italic; opacity:.7; margin-bottom:14px; font-weight:600;}
+  .hot-card-effect{font-weight:800; margin-bottom:16px; font-size:1.05rem;}
+  .hot-card-prompt{font-weight:700; margin-bottom:10px;}
+
+  /* ---------- SPLASH ---------- */
+  #turnSplash{
+    position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center;
+    color:#fff; text-align:center;
+  }
+  #turnSplash.active{display:flex;}
+  #turnSplash .splash-text{font-family:'Bangers'; font-size:min(11vw,3.2rem); text-shadow:4px 4px 0 var(--ink); padding: 0 20px;}
+  .pop-badge{position:fixed; z-index:70; pointer-events:none;}
+  .pop-badge .burst-content{font-family:'Bangers'; color:#fff; text-shadow:2px 2px 0 var(--ink);}
+  @keyframes popBadge{ 0%{transform:scale(.2) rotate(-8deg); opacity:0;} 30%{transform:scale(1.15) rotate(4deg); opacity:1;} 70%{transform:scale(1) rotate(0deg); opacity:1;} 100%{transform:scale(.8) rotate(0deg); opacity:0;} }
+
+  /* ---------- WIN ---------- */
+  #screen-win .win-burst{width:min(70vw,300px); height:min(70vw,300px); transform:rotate(-4deg); margin-bottom:14px;}
+  #screen-win .win-burst .burst-content{transform:rotate(4deg); flex-direction:column;}
+  #screen-win .win-text{font-family:'Bangers'; font-size:min(13vw,3rem); color:#fff; text-shadow:3px 3px 0 var(--ink);}
+  #screen-win .win-team{font-family:'Bangers'; font-size:min(8vw,1.8rem); color:#fff; text-shadow:2px 2px 0 var(--ink);}
+
+  .locked{pointer-events:none; opacity:.6;}
+
+  @media (max-width:420px){
+    .reveal-word{font-size:2.1rem;}
+    .btn{padding:12px 22px; font-size:.95rem;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-right-credit">created by Ceyhun Eriş</div>
+
+  <!-- START SCREEN -->
+  <section class="screen active" id="screen-start">
+    <div class="burst-wrap logo-badge">
+      <div class="burst-outline"></div>
+      <div class="burst-color"></div>
+      <div class="burst-content logo-text">9/9</div>
+    </div>
+    <p class="tagline">Guess the words, clear your deck, become the champion!</p>
+    <div class="mode-select">
+      <button class="btn btn-red" id="btnModeClassic">9/9 CLASSIC</button>
+      <p class="mode-sub">Classic word guessing</p>
+      <button class="btn btn-orange" id="btnModeHot">🌶️ X/X HOT MODE</button>
+      <p class="mode-sub">Additional surprises with Chilli or Sweeet Chilli cards</p>
+    </div>
+  </section>
+
+  <!-- WORD SOURCE SCREEN -->
+  <section class="screen" id="screen-source">
+    <div class="panel" style="text-align:center;">
+      <h2 style="font-size:2rem;">Choose your words!</h2>
+      <p class="source-sub">Which word pool do you want to play with?</p>
+      <div class="source-list">
+        <button class="btn src-btn" data-source="basic">
+          <span class="src-title">BASIC</span>
+          <span class="src-desc">The classic word pool &middot; <span id="cntBasic"></span></span>
+        </button>
+        <button class="btn btn-green src-btn" data-source="units">
+          <span class="src-title">UNITS</span>
+          <span class="src-desc">Transport, places &amp; everyday verbs &middot; <span id="cntUnits"></span></span>
+        </button>
+        <button class="btn btn-purple src-btn" data-source="mixed">
+          <span class="src-title">MIXED</span>
+          <span class="src-desc">Everything shuffled together &middot; <span id="cntMixed"></span></span>
+        </button>
+      </div>
+      <label class="mine-switch" id="mineSwitch">
+        <span>
+          <div class="ms-title">💣 MINEFIELD MODE</div>
+          <div class="ms-desc">Verb cards are mines! Say the meaning AND the V2 form.</div>
+        </span>
+        <input type="checkbox" id="mineToggle">
+        <span class="ms-track"></span>
+      </label>
+      <button class="btn btn-ghost" id="btnSourceBack">&larr; Back</button>
+    </div>
+  </section>
+
+  <!-- COUNT SCREEN -->
+  <section class="screen" id="screen-count">
+    <div class="panel" style="text-align:center;">
+      <h2 style="font-size:2rem;">How many group?</h2>
+      <div class="count-grid" id="countGrid"></div>
+      <button class="btn btn-green" id="btnGoOrder" disabled>Continue</button>
+    </div>
+  </section>
+
+  <!-- ORDER SCREEN -->
+  <section class="screen" id="screen-order">
+    <h2 style="font-size:1.8rem; margin-bottom:6px;">WAITING FOR THE TURN...</h2>
+    <p style="font-weight:700; opacity:.75; margin:0 0 6px;">Fate decides who will play first!</p>
+    <div id="orderChips"></div>
+    <button class="btn btn-red" id="btnGoGame" style="display:none;">START THE GAME</button>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section class="screen" id="screen-game">
+    <div class="game-top">
+      <div class="mini-logo" id="miniLogo">9/9</div>
+      <div style="font-weight:700; font-size:.85rem; opacity:.7;">Play in turns!</div>
+    </div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="turn-banner" id="turnBanner">Turn: Group 1</div>
+    <div class="game-board">
+      <div id="cardGrid"></div>
+      <div class="hot-deck-wrap" id="hotDeckWrap">
+        <div class="hot-deck-stack">🌶️</div>
+        <div class="hot-deck-label">CHILLI or SWEEEET CHILLI</div>
+        <div class="hot-deck-count" id="hotDeckCount">100 CARD</div>
+        <button class="btn btn-red" id="btnDrawHot" data-sfx="custom">DRAW A CARD</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIN SCREEN -->
+  <section class="screen" id="screen-win">
+    <div class="burst-wrap win-burst">
+      <div class="burst-outline"></div>
+      <div class="burst-color"></div>
+      <div class="burst-content">
+        <div class="win-text">WINNER!</div>
+        <div class="win-team" id="winTeamName">Group 1</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="btnReplay" style="margin-top:20px;">Play Again</button>
+  </section>
+
+  <!-- REVEAL MODAL -->
+  <div id="revealOverlay">
+    <div class="reveal-card" id="revealCard">
+      <div class="mine-banner" id="mineBanner">💣 MINE! 💣<small>Say its MEANING and its V2 form!</small></div>
+      <div style="font-weight:700; opacity:.6; font-size:.9rem;">WORD</div>
+      <div class="reveal-word" id="revealWordText">WORD</div>
+      <div class="timer-wrap">
+        <div class="timer-bar-track"><div class="timer-bar-fill" id="timerBarFill"></div></div>
+        <div class="timer-num" id="timerNum">20</div>
+      </div>
+      <div class="reveal-actions">
+        <button class="btn btn-green" id="btnCorrect" data-sfx="custom">CORRECT ✓</button>
+        <button class="btn btn-ghost" id="btnPass" data-sfx="custom">PASS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOT CARD MODAL -->
+  <div id="hotCardOverlay">
+    <div class="panel hot-card">
+      <div class="hot-card-badge" id="hotCardBadge">🌶️ CHILLI</div>
+      <h3 class="hot-card-title" id="hotCardTitle">Title</h3>
+      <div class="hot-card-sub" id="hotCardSubtitle">Subtitle</div>
+      <div class="hot-card-effect" id="hotCardEffect">Effect</div>
+      <div class="hot-card-prompt" id="hotCardPrompt"></div>
+      <div class="reveal-actions" id="hotCardActions"></div>
+    </div>
+  </div>
+
+  <!-- TURN SPLASH -->
+  <div id="turnSplash"><div class="splash-text" id="splashText">TURN: GROUP 1</div></div>
+
+  <!-- AUDIO TOGGLES -->
+  <div class="audio-toggles">
+    <button class="tgl" id="btnMusic" aria-label="Toggle music" title="Music on/off">🎵</button>
+    <button class="tgl" id="btnSfx" aria-label="Toggle sound effects" title="Sound effects on/off">🔊</button>
+  </div>
+
+<script>
+(function(){
+
+  /* ================= AUDIO ENGINE (all synthesized, no files) ================= */
+  const SND = (function(){
+    let ctx = null, sfxGain = null, musicGain = null, noiseBuf = null, timer = null;
+    let musicOn = true, sfxOn = true, unlocked = false;
+    try{
+      if(localStorage.getItem('nn_music') === '0') musicOn = false;
+      if(localStorage.getItem('nn_sfx') === '0') sfxOn = false;
+    }catch(e){}
+
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+    function ensure(){
+      if(!ctx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(!AC) return null;
+        ctx = new AC();
+        const comp = ctx.createDynamicsCompressor();
+        comp.connect(ctx.destination);
+        musicGain = ctx.createGain(); musicGain.gain.value = 0.30; musicGain.connect(comp);
+        sfxGain = ctx.createGain(); sfxGain.gain.value = 0.9; sfxGain.connect(comp);
+        noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for(let i=0;i<d.length;i++) d[i] = Math.random()*2 - 1;
+      }
+      if(ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    }
+
+    function tone(dest, f, t, d, type, v, f2){
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(f, t);
+      if(f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(dest);
+      o.start(t); o.stop(t + d + 0.05);
+    }
+
+    function noise(dest, t, d, v, type, f1, f2, q){
+      const s = ctx.createBufferSource();
+      s.buffer = noiseBuf; s.loop = true;
+      const flt = ctx.createBiquadFilter();
+      flt.type = type;
+      flt.frequency.setValueAtTime(f1, t);
+      if(f2 && f2 !== f1) flt.frequency.exponentialRampToValueAtTime(f2, t + d);
+      if(q) flt.Q.value = q;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      s.connect(flt); flt.connect(g); g.connect(dest);
+      s.start(t); s.stop(t + d + 0.05);
+    }
+
+    /* ---------- sound effects ---------- */
+    const FX = {
+      click(t){ tone(sfxGain, 620, t, .07, 'square', .11, 980); },
+      tick(t){ tone(sfxGain, 1500, t, .04, 'square', .07); },
+      pop(t){ tone(sfxGain, 380, t, .13, 'triangle', .3, 900); },
+      whoosh(t){ noise(sfxGain, t, .38, .5, 'bandpass', 300, 2600, 1.1); },
+      // card draw: paper swish + little flick
+      card(t){
+        noise(sfxGain, t, .17, .55, 'bandpass', 900, 3800, 1.2);
+        noise(sfxGain, t + .11, .05, .35, 'highpass', 2500);
+        tone(sfxGain, 270, t + .11, .07, 'triangle', .22, 170);
+      },
+      // correct: happy rising arpeggio + sparkle
+      correct(t){
+        [72, 76, 79, 84].forEach((m, i) => tone(sfxGain, mtof(m), t + i*.085, .22, 'square', .13));
+        tone(sfxGain, mtof(96), t + .34, .45, 'sine', .14);
+        tone(sfxGain, mtof(88), t + .40, .40, 'sine', .08);
+      },
+      // wrong: sad trombone "wah wah wah waaah"
+      wrong(t){
+        [67, 66, 65].forEach((m, i) => tone(sfxGain, mtof(m), t + i*.28, .26, 'sawtooth', .09));
+        tone(sfxGain, mtof(64), t + .84, .75, 'sawtooth', .10, mtof(57));
+        tone(sfxGain, mtof(52), t + .84, .75, 'triangle', .14, mtof(45));
+      },
+      // chilli: wacky slide-whistle + crazy blips + boing
+      chilli(t){
+        tone(sfxGain, 300, t, .28, 'sine', .28, 1900);
+        tone(sfxGain, 1900, t + .28, .36, 'sine', .28, 220);
+        for(let i=0;i<8;i++){
+          tone(sfxGain, 450 + Math.random()*1400, t + .66 + i*.055, .05, 'square', .11);
+        }
+        tone(sfxGain, 200, t + 1.1, .32, 'sine', .3, 760);
+        tone(sfxGain, 760, t + 1.42, .22, 'sine', .22, 120);
+        noise(sfxGain, t + 1.1, .1, .25, 'highpass', 3000);
+      },
+      // sweet chilli: magical sparkles
+      sweet(t){
+        [84, 88, 91, 96, 100, 103].forEach((m, i) => tone(sfxGain, mtof(m), t + i*.07, .35, 'sine', .15));
+        noise(sfxGain, t, .5, .12, 'highpass', 6000);
+      },
+      // mine: explosion boom + alarm siren
+      mine(t){
+        noise(sfxGain, t, .9, .95, 'lowpass', 3000, 70, .8);
+        tone(sfxGain, 150, t, .7, 'sawtooth', .38, 32);
+        tone(sfxGain, 70, t, .8, 'sine', .5, 28);
+        noise(sfxGain, t, .12, .5, 'highpass', 4000);
+        for(let i=0;i<5;i++){
+          tone(sfxGain, i%2 ? 620 : 880, t + .6 + i*.17, .16, 'square', .09);
+        }
+      },
+      win(t){
+        [[72,0],[72,.13],[72,.26],[76,.42],[79,.62]].forEach(a => tone(sfxGain, mtof(a[0]), t + a[1], .2, 'square', .13));
+        [72, 76, 79, 84].forEach(m => tone(sfxGain, mtof(m), t + .95, .9, 'square', .08));
+        tone(sfxGain, mtof(96), t + .95, .9, 'sine', .12);
+      }
+    };
+
+    function play(name){
+      if(!sfxOn || !FX[name]) return;
+      if(!ensure()) return;
+      FX[name](ctx.currentTime + 0.005);
+    }
+
+    /* ---------- background music: bouncy chiptune loop ---------- */
+    const STEP = 60 / 126 / 2;                // eighth note at 126 BPM
+    const CH = [
+      {bass:48, tri:[60,64,67]},               // C
+      {bass:45, tri:[57,60,64]},               // Am
+      {bass:41, tri:[60,65,69]},               // F
+      {bass:43, tri:[59,62,67]}                // G
+    ];
+    const MEL = [
+      [76,0,79,76, 74,0,72,0],
+      [72,0,76,72, 69,0,72,76],
+      [77,0,81,77, 76,0,72,0],
+      [74,0,79,74, 71,74,79,0],
+      [79,79,0,76, 79,0,84,0],
+      [81,0,79,76, 72,0,76,0],
+      [77,77,0,81, 84,0,81,77],
+      [79,0,74,0, 71,74,79,83]
+    ];
+    let stepIdx = 0, nextT = 0;
+
+    function playStep(i, t){
+      const bar = Math.floor(i / 8) % 8, s = i % 8, ch = CH[bar % 4];
+      if(s === 0 || s === 4){
+        tone(musicGain, 160, t, .14, 'sine', .55, 45);
+      }
+      if(s === 2 || s === 6){
+        noise(musicGain, t, .09, .22, 'bandpass', 1800, 1800, 1);
+        ch.tri.forEach(m => tone(musicGain, mtof(m), t, STEP*.8, 'square', .03));
+      }
+      noise(musicGain, t, .03, s % 2 ? .07 : .04, 'highpass', 7000);
+      if(s === 0 || s === 3 || s === 4 || s === 6){
+        const off = s === 3 ? 12 : (s === 6 ? 7 : 0);
+        tone(musicGain, mtof(ch.bass + off), t, STEP*1.5, 'triangle', .42);
+      }
+      const m = MEL[bar][s];
+      if(m) tone(musicGain, mtof(m), t, STEP*1.4, 'square', .10);
+    }
+
+    function schedule(){
+      while(nextT < ctx.currentTime + 0.14){
+        playStep(stepIdx, nextT);
+        nextT += STEP;
+        stepIdx = (stepIdx + 1) % 64;
+      }
+    }
+    function startMusic(){
+      if(timer || !ensure()) return;
+      nextT = ctx.currentTime + 0.06;
+      timer = setInterval(schedule, 30);
+    }
+    function stopMusic(){
+      if(timer){ clearInterval(timer); timer = null; }
+    }
+
+    function unlock(){
+      if(unlocked) return;
+      if(!ensure()) return;
+      unlocked = true;
+      if(musicOn) startMusic();
+    }
+    ['pointerdown','touchstart','keydown'].forEach(ev => document.addEventListener(ev, unlock, true));
+    document.addEventListener('visibilitychange', ()=>{
+      if(!ctx) return;
+      if(document.hidden) ctx.suspend(); else ctx.resume();
+    });
+
+    function save(k, v){ try{ localStorage.setItem(k, v ? '1' : '0'); }catch(e){} }
+    return {
+      play,
+      isMusicOn: ()=>musicOn,
+      isSfxOn: ()=>sfxOn,
+      toggleMusic(){
+        musicOn = !musicOn; save('nn_music', musicOn);
+        if(musicOn){ if(unlocked) startMusic(); } else stopMusic();
+        return musicOn;
+      },
+      toggleSfx(){
+        sfxOn = !sfxOn; save('nn_sfx', sfxOn);
+        return sfxOn;
+      }
+    };
+  })();
+
+  // toggle buttons
+  (function(){
+    const bm = document.getElementById('btnMusic'), bs = document.getElementById('btnSfx');
+    function refresh(){
+      bm.classList.toggle('off', !SND.isMusicOn());
+      bs.classList.toggle('off', !SND.isSfxOn());
+    }
+    bm.addEventListener('click', ()=>{ SND.toggleMusic(); refresh(); });
+    bs.addEventListener('click', ()=>{ SND.toggleSfx(); refresh(); SND.play('click'); });
+    refresh();
+  })();
+
+  // menu-button click sounds (buttons with data-sfx="custom" play their own sounds)
+  document.addEventListener('click', (e)=>{
+    const el = e.target.closest('.btn, .count-chip');
+    if(!el || el.disabled || el.dataset.sfx === 'custom') return;
+    SND.play('click');
+  }, true);
+
+
+  const WORD_POOL = ["Accept","Accident","Actor","Address","Advice","Afraid","Afternoon","Age","Air","Airport",
+  "Angry","Animal","Answer","Apple","Arm","Arrive","Art","Ask","Aunt","Autumn",
+  "Baby","Bad","Bag","Baker","Ball","Banana","Bank","Bath","Beach","Bear",
+  "Beautiful","Bed","Bedroom","Begin","Believe","Bicycle","Big","Bird","Black","Blue",
+  "Boat","Body","Bone","Book","Bored","Boring","Boss","Box","Boy","Brain",
+  "Bread","Break","Breakfast","Bridge","Bring","Brother","Brown","Build","Building","Bus",
+  "Business","Busy","Butter","Buy","Cake","Call","Camera","Camp","Car","Card",
+  "Carry","Cat","Catch","Center","Chair","Change","Cheap","Cheese","Chicken","Child",
+  "Choose","Church","Cinema","City","Class","Clean","Clever","Clock","Close","Clothes",
+  "Cloud","Coat","Coffee","Cold","Color","Come","Company","Computer","Cook","Cool",
+  "Cost","Country","Course","Cousin","Cow","Cry","Cup","Cut","Dance","Danger",
+  "Dark","Daughter","Day","Dead","Decide","Deep","Dentist","Desk","Dictionary","Die",
+  "Different","Difficult","Dinner","Dirty","Doctor","Dog","Door","Draw","Dream","Dress",
+  "Drink","Drive","Driver","Dry","Ear","Early","Earth","Easy","Eat","Egg",
+  "Elephant","Empty","End","Engineer","Enjoy","Enough","Evening","Exam","Example","Excellent",
+  "Excuse","Exercise","Expensive","Explain","Eye","Face","Factory","Fall","Family","Famous",
+  "Farm","Farmer","Fast","Fat","Father","Feel","Find","Fine","Finger","Finish",
+  "Fire","Fish","Flat","Floor","Flower","Fly","Food","Foot","Forget","Fork",
+  "Free","Fresh","Friend","Fruit","Full","Fun","Funny","Game","Garden","Gate",
+  "Get","Girl","Give","Glass","Go","Gold","Good","Grandfather","Grandmother","Grape",
+  "Green","Grey","Group","Grow","Guess","Guest","Guitar","Hair","Half","Hand",
+  "Happen","Happy","Hard","Hat","Hate","Head","Health","Hear","Heart","Heavy",
+  "Help","High","History","Hobby","Holiday","Home","Hope","Horse","Hospital","Hot",
+  "Hotel","Hour","House","Hungry","Husband","Ice","Idea","Important","Interesting","Internet",
+  "Island","Jacket","Job","Join","Joke","Juice","Jump","Keep","Key","Kill",
+  "Kind","King","Kiss","Kitchen","Knee","Knife","Know","Lake","Language","Large",
+  "Last","Late","Laugh","Learn","Leave","Left","Leg","Lemon","Lesson","Letter",
+  "Library","Life","Light","Like","Line","Lion","Listen","Little","Live","Long",
+  "Look","Love","Low","Luck","Machine","Magazine","Make","Man","Map","Market",
+  "Marry","Match","Meat","Meet","Message","Milk","Mind","Minute","Mirror","Money"];
+
+  const UNIT_WORDS = ("against,airport,be,begin,boat,bridge,build,buy,camera,car,carry,castle,cathedral,chariot,city,coach,come,do,"
+  + "enemy,ferry,fight,find,fly,fountain,go,good (goods),grow,guidebook,have,hunt,know,leave,lighthouse,live,lorry,make,map,mobile,"
+  + "money,monument,motorcycle,museum,music,park,phone,plane,play,port,pottery,ride,sail,sailor,say,see,sleep,speedboat,square,"
+  + "station,statue,stop,suitcase,sunglasses,take,temple,theme,tissue,tower,trader,train,vegetable,wall,wallet,warrior,watch,win,"
+  + "wooden,write").split(',').map(w => w.charAt(0).toUpperCase() + w.slice(1));
+
+  /* ================= MINEFIELD: verb data (V2 + Turkish meaning) ================= */
+  const VERB_DATA = {
+    accept:["accepted","kabul etmek"], answer:["answered","cevaplamak"], arrive:["arrived","varmak, ulaşmak"],
+    ask:["asked","sormak"], be:["was / were","olmak"], begin:["began","başlamak"], believe:["believed","inanmak"],
+    break:["broke","kırmak"], bring:["brought","getirmek"], build:["built","inşa etmek"], buy:["bought","satın almak"],
+    call:["called","aramak, çağırmak"], camp:["camped","kamp yapmak"], carry:["carried","taşımak"],
+    catch:["caught","yakalamak"], change:["changed","değiştirmek"], choose:["chose","seçmek"], close:["closed","kapatmak"],
+    come:["came","gelmek"], cook:["cooked","pişirmek"], cost:["cost","mal olmak, maliyeti olmak"], cry:["cried","ağlamak"],
+    cut:["cut","kesmek"], dance:["danced","dans etmek"], decide:["decided","karar vermek"], die:["died","ölmek"],
+    do:["did","yapmak"], draw:["drew","çizmek"], dream:["dreamed / dreamt","rüya görmek"], dress:["dressed","giyinmek"],
+    drink:["drank","içmek"], drive:["drove","sürmek"], eat:["ate","yemek yemek"], enjoy:["enjoyed","keyif almak"],
+    exercise:["exercised","egzersiz yapmak"], explain:["explained","açıklamak"], fall:["fell","düşmek"],
+    feel:["felt","hissetmek"], fight:["fought","savaşmak, kavga etmek"], find:["found","bulmak"],
+    finish:["finished","bitirmek"], fly:["flew","uçmak"], forget:["forgot","unutmak"], get:["got","almak, elde etmek"],
+    give:["gave","vermek"], go:["went","gitmek"], grow:["grew","büyümek"], guess:["guessed","tahmin etmek"],
+    happen:["happened","olmak, meydana gelmek"], hate:["hated","nefret etmek"], have:["had","sahip olmak"],
+    hear:["heard","duymak"], help:["helped","yardım etmek"], hope:["hoped","ummak"], hunt:["hunted","avlamak"],
+    join:["joined","katılmak"], joke:["joked","şaka yapmak"], jump:["jumped","zıplamak"], keep:["kept","tutmak, saklamak"],
+    kill:["killed","öldürmek"], kiss:["kissed","öpmek"], know:["knew","bilmek"], laugh:["laughed","gülmek"],
+    learn:["learned / learnt","öğrenmek"], leave:["left","ayrılmak, bırakmak"], like:["liked","sevmek, hoşlanmak"],
+    listen:["listened","dinlemek"], live:["lived","yaşamak"], look:["looked","bakmak"], love:["loved","sevmek, aşık olmak"],
+    make:["made","yapmak, üretmek"], marry:["married","evlenmek"], match:["matched","eşleştirmek"], meet:["met","buluşmak, tanışmak"],
+    mind:["minded","aldırmak, önemsemek"], play:["played","oynamak, çalmak"], ride:["rode","binmek (at, bisiklet)"],
+    sail:["sailed","denizde yol almak"], say:["said","söylemek"], see:["saw","görmek"], sleep:["slept","uyumak"],
+    stop:["stopped","durmak, durdurmak"], take:["took","almak, götürmek"], watch:["watched","izlemek"],
+    win:["won","kazanmak"], write:["wrote","yazmak"]
+  };
+  function verbInfo(text){
+    if(!state.minefield) return null;
+    const key = String(text).toLowerCase().replace(/\s*\(.*\)/, '').trim();
+    return Object.prototype.hasOwnProperty.call(VERB_DATA, key) ? VERB_DATA[key] : null;
+  }
+
+  function buildPool(source){
+    if(source === 'units') return UNIT_WORDS.slice();
+    if(source === 'mixed'){
+      const seen = new Set(), out = [];
+      WORD_POOL.concat(UNIT_WORDS).forEach(w=>{
+        const key = w.toLowerCase().replace(/\s*\(.*\)/, '');
+        if(!seen.has(key)){ seen.add(key); out.push(w); }
+      });
+      return out;
+    }
+    return WORD_POOL.slice();
+  }
+
+  const TEAM_THEMES = [
+    {bg:"#FF3B30", text:"#ffffff"},
+    {bg:"#2867FF", text:"#ffffff"},
+    {bg:"#17B978", text:"#0b2f1d"},
+    {bg:"#FFC93C", text:"#1A1A1A"},
+    {bg:"#9B5DE5", text:"#ffffff"},
+    {bg:"#FF8C42", text:"#1A1A1A"},
+    {bg:"#FF5C8A", text:"#ffffff"},
+    {bg:"#12B5B0", text:"#03302d"}
+  ];
+
+  /* ================= HOT MODE CARD DATA ================= */
+  const HOT_CARD_DEFS = [
+    ["Hungry Dog!","The dog ate your homework."],
+    ["Zombie Teacher!","Run away!"],
+    ["No Wi-Fi!","Dinosaur game starts."],
+    ["Empty Fridge!","You are so hungry."],
+    ["Wrong Bus!","Where are you going?"],
+    ["Lazy Boy!","You slept in class."],
+    ["Broken Phone!","Oops, it dropped."],
+    ["Giant Spider!","Ahhh, a bug!"],
+    ["Angry Mom!","Clean your room now!"],
+    ["Rainy Day!","You are totally wet."],
+    ["Big Boss!","Don't make him angry."],
+    ["Dragon's Fire!","It is getting hot."],
+    ["Toxic Slime!","Eww, it is green."],
+    ["Mad Scientist!","Boom! A big explosion."],
+    ["Vampire Bat!","It bites in the dark."],
+    ["Magic Curse!","You are a frog now."],
+    ["Space Hole!","Falling down..."],
+    ["Crazy Robot!","System error."],
+    ["Dark Forest!","Don't lose your way."],
+    ["Ghost House!","Did you hear that?"],
+    ["Slippery Floor!","Boom! You fell down."],
+    ["Bad Luck!","A black cat passed by."],
+    ["Spicy Pepper!","Need water, now!"],
+    ["Stolen Bike!","Walk to school today."],
+    ["Lost Keys!","You are locked outside."],
+    ["Melting Ice Cream!","Oh no, it's on your shirt."],
+    ["Slow Turtle!","You are too slow."],
+    ["Loud Music!","My ears hurt!"],
+    ["Heavy Bag!","So many books to carry."],
+    ["Fake Friend!","They didn't help you."],
+    ["Freeze Spell!","You are ice now."],
+    ["Stop Sign!","Wait here."],
+    ["Red Card!","Out of the game!"],
+    ["Sleep Potion!","Zzzzz..."],
+    ["Time Stop!","The clock is frozen."],
+    ["Prison Cell!","You are locked up."],
+    ["Broken Leg!","Go to the hospital."],
+    ["Hypnosis!","Look into my eyes..."],
+    ["Trap Door!","You fell into a hole."],
+    ["Thick Fog!","You can't see anything."],
+    ["Mirror World!","Everything is reversed."],
+    ["Alien Talk!","Speak like a Martian."],
+    ["Brain Glitch!","Error 404: Words reversed."],
+    ["Magic Echo!","Oche cigam..."],
+    ["Backwards Clock!","Time goes back."],
+    ["Upside Down!","You are on the ceiling."],
+    ["Rewind Button!","Play it backwards."],
+    ["Dizzy Head!","The room is spinning."],
+    ["Confused Wizard!","He mixed the spell."],
+    ["Ninja Trick!","Confuse your enemy."],
+    ["Ninja Star!","Hit your enemy."],
+    ["Hot Potato!","Pass it quickly!"],
+    ["Boomerang!","Throw it to them."],
+    ["Mailman!","A special delivery for them."],
+    ["Poison Apple!","Give it to the witch."],
+    ["UFO Beam!","Take this away!"],
+    ["Copy Paste!","Send the virus."],
+    ["Troll Face!","Problem? Not for me!"],
+    ["Catapult!","Launch the rock!"],
+    ["Magic Wind!","Blow the problem away."],
+    ["Magic Eraser!","Poof! It is gone."],
+    ["Hero Sword!","Cut the problem."],
+    ["Fairy Dust!","Make a wish."],
+    ["Super Speed!","Flash is here!"],
+    ["Lucky Day!","You found a coin."],
+    ["Dragon Slayer!","The monster is dead."],
+    ["Golden Key!","Open the secret door."],
+    ["Time Travel!","Fix your mistake."],
+    ["Genius Brain!","You are Einstein!"],
+    ["Angel Blessing!","A gift from the sky."],
+    ["Double Strike!","Hit two times."],
+    ["Twin Magic!","Two is better than one."],
+    ["Sugar Rush!","So much energy!"],
+    ["BOGO Offer!","Buy one, get one free."],
+    ["Mirror Clone!","Your copy will help."],
+    ["Double Jump!","Jump higher!"],
+    ["Extra Battery!","Power is 200%."],
+    ["Greedy Goblin!","I want everything!"],
+    ["Echo Power!","Action... Action..."],
+    ["Two Heads!","You are a mutant now."],
+    ["X-Ray Glasses!","I can see your bones."],
+    ["Eagle Eye!","See from the sky."],
+    ["Crystal Ball!","See the future."],
+    ["Hacker Skill!","System unlocked."],
+    ["Third Eye!","Ultimate vision."],
+    ["Sun Light!","No more secrets."],
+    ["Detective Glass!","Find the clues."],
+    ["Magic Torch!","Illuminate the room."],
+    ["Owl at Night!","Darkness is nothing."],
+    ["Secret Map!","All locations revealed."],
+    ["Iron Shield!","Block the attack."],
+    ["Force Field!","Nothing can touch you."],
+    ["Invisible Cloak!","They can't see you."],
+    ["Magic Aura!","Protection activated."],
+    ["Bodyguard!","He will take the punch."],
+    ["Teacher's Pet!","The teacher loves you."],
+    ["Smoke Bomb!","Ninja vanished."],
+    ["Hit and Run!","Fast escape."],
+    ["Teleport!","Beam me up."],
+    ["Express Train!","Leaving the station."]
+  ];
+
+  const HOT_RANGES = [
+    {end:10,  category:'chilli', effectType:'add_now',        n:1, effect:'Add 1 extra card.'},
+    {end:20,  category:'chilli', effectType:'cond_wrong',      n:2, effect:'If wrong, add 2 extra cards.'},
+    {end:30,  category:'chilli', effectType:'cond_wrong',      n:1, effect:'If wrong, add 1 extra card.'},
+    {end:40,  category:'chilli', effectType:'lose_turn',       n:0, effect:'Lose your turn.'},
+    {end:50,  category:'chilli', effectType:'say_backwards',   n:0, effect:'Say the word backwards.'},
+    {end:60,  category:'sweet',  effectType:'give_to_team',    n:1, effect:'Give 1 card to the next team.'},
+    {end:70,  category:'sweet',  effectType:'delete_card',     n:1, effect:'Delete 1 card.'},
+    {end:80,  category:'sweet',  effectType:'guess_two',       n:0, effect:'Guess 2 cards this turn.'},
+    {end:90,  category:'sweet',  effectType:'see_all',         n:0, effect:'See all cards for 1 turn.'},
+    {end:95,  category:'sweet',  effectType:'block_chilli',    n:0, effect:'Block the next Chilli card.'},
+    {end:100, category:'sweet',  effectType:'delete_end_turn', n:1, effect:'Delete 1 card and end your turn.'}
+  ];
+
+  function buildHotCards(){
+    let r = 0;
+    return HOT_CARD_DEFS.map((def, i)=>{
+      while(i >= HOT_RANGES[r].end) r++;
+      const cfg = HOT_RANGES[r];
+      return {
+        id: 'hc'+i,
+        title: def[0],
+        subtitle: def[1],
+        category: cfg.category,
+        effectType: cfg.effectType,
+        n: cfg.n,
+        effect: cfg.effect
+      };
+    });
+  }
+  const HOT_CARDS = buildHotCards();
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  const state = {
+    mode: 'classic',
+    minefield: false,
+    source: 'basic',
+    activePool: [],
+    groupCount: 4,
+    groups: [],
+    turnOrder: [],
+    turnPointer: 0,
+    currentGroupId: null,
+    locked: false,
+    extraPool: [],
+    hotDeck: [],
+    hotDrawnThisTurn: false,
+    turnGuessesLeft: 1,
+    revealAllThisTurn: false
+  };
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ---------------- FLIP reorder helper ---------------- */
+  function flipReorder(container, newOrderKeys, duration, done){
+    const items = [...container.children];
+    const first = new Map();
+    items.forEach(el => first.set(el.dataset.key, el.getBoundingClientRect()));
+    newOrderKeys.forEach(key => {
+      const el = container.querySelector('[data-key="'+key+'"]');
+      if(el) container.appendChild(el);
+    });
+    items.forEach(el => {
+      const key = el.dataset.key;
+      const f = first.get(key);
+      const l = el.getBoundingClientRect();
+      if(!f) return;
+      const dx = f.left - l.left, dy = f.top - l.top;
+      el.style.transition = 'none';
+      el.style.transform = 'translate('+dx+'px,'+dy+'px)';
+    });
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        items.forEach(el=>{
+          el.style.transition = 'transform '+duration+'ms cubic-bezier(.22,.8,.25,1)';
+          el.style.transform = '';
+        });
+      });
+    });
+    if(done) setTimeout(done, duration + 20);
+  }
+
+  /* ================= START -> MODE -> COUNT ================= */
+  document.getElementById('btnModeClassic').addEventListener('click', ()=>{
+    state.mode = 'classic';
+    showScreen('screen-source');
+  });
+  document.getElementById('btnModeHot').addEventListener('click', ()=>{
+    state.mode = 'hot';
+    showScreen('screen-source');
+  });
+
+  document.getElementById('cntBasic').textContent = buildPool('basic').length + ' words';
+  document.getElementById('cntUnits').textContent = buildPool('units').length + ' words';
+  document.getElementById('cntMixed').textContent = buildPool('mixed').length + ' words';
+  document.querySelectorAll('.src-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      state.source = b.dataset.source;
+      showScreen('screen-count');
+    });
+  });
+  document.getElementById('mineToggle').addEventListener('change', (e)=>{
+    state.minefield = e.target.checked;
+    SND.play('click');
+  });
+  document.getElementById('btnSourceBack').addEventListener('click', ()=>{ showScreen('screen-start'); });
+
+  const countGrid = document.getElementById('countGrid');
+  for(let n=2;n<=8;n++){
+    const chip = document.createElement('div');
+    chip.className = 'count-chip';
+    chip.textContent = n;
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('.count-chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      state.groupCount = n;
+      document.getElementById('btnGoOrder').disabled = false;
+    });
+    countGrid.appendChild(chip);
+  }
+
+  document.getElementById('btnGoOrder').addEventListener('click', ()=>{
+    initGroups();
+    renderOrderScreen();
+    showScreen('screen-order');
+  });
+
+  /* ================= GROUP INIT ================= */
+  function initGroups(){
+    state.activePool = buildPool(state.source);
+    const pool = shuffle(state.activePool);
+    let idx = 0;
+    state.groups = [];
+    for(let i=0;i<state.groupCount;i++){
+      const words = pool.slice(idx, idx+9).map((w,j)=>({id:'g'+i+'_w'+j, text:w, done:false}));
+      idx += 9;
+      state.groups.push({
+        id:i,
+        name:'Group '+(i+1),
+        theme: TEAM_THEMES[i % TEAM_THEMES.length],
+        words: words,
+        order: words.map(w=>w.id),
+        shieldChilli: 0,
+        pendingWrongPenalty: 0
+      });
+    }
+    state.extraPool = pool.slice(idx);
+  }
+
+  /* ================= ORDER SCREEN ================= */
+  function renderOrderScreen(){
+    const container = document.getElementById('orderChips');
+    container.innerHTML = '';
+    state.groups.forEach(g=>{
+      const chip = document.createElement('div');
+      chip.className = 'order-chip';
+      chip.dataset.key = 'ord'+g.id;
+      chip.style.background = g.theme.bg;
+      chip.style.color = g.theme.text;
+      chip.innerHTML = '<span>'+g.name+'</span><div class="rank burst-wrap"><div class="burst-outline"></div><div class="burst-color" style="background:var(--yellow)"></div><div class="burst-content"></div></div>';
+      container.appendChild(chip);
+    });
+
+    document.getElementById('btnGoGame').style.display = 'none';
+
+    const finalOrder = shuffle(state.groups.map(g=>g.id));
+    state.turnOrder = finalOrder;
+
+    let current = state.groups.map(g=>g.id);
+    const delays = [90,110,140,180,230,300,380,480];
+    let step = 0;
+
+    function doStep(){
+      if(step < delays.length - 1){
+        current = shuffle(current);
+      } else {
+        current = finalOrder.slice();
+      }
+      SND.play('tick');
+      flipReorder(container, current.map(id=>'ord'+id), 220, ()=>{
+        step++;
+        if(step < delays.length){
+          setTimeout(doStep, delays[step]);
+        } else {
+          revealRanks(finalOrder);
+        }
+      });
+    }
+    doStep();
+  }
+
+  function revealRanks(finalOrder){
+    finalOrder.forEach((gid, rank)=>{
+      const chip = document.querySelector('[data-key="ord'+gid+'"]');
+      if(!chip) return;
+      chip.classList.add('revealed');
+      chip.querySelector('.rank .burst-content').textContent = (rank+1);
+    });
+    document.getElementById('btnGoGame').style.display = 'inline-block';
+    SND.play('pop');
+  }
+
+  document.getElementById('btnGoGame').addEventListener('click', ()=>{
+    state.turnPointer = 0;
+    state.hotDeck = state.mode === 'hot' ? shuffle(HOT_CARDS.slice()) : [];
+    document.getElementById('miniLogo').textContent = state.mode === 'hot' ? '🌶️ X/X' : '9/9';
+    showScreen('screen-game');
+    renderScoreboard();
+    updateHotDeckUI();
+    startTurn(state.turnOrder[0]);
+  });
+
+  /* ================= SCOREBOARD ================= */
+  function renderScoreboard(){
+    const board = document.getElementById('scoreboard');
+    board.innerHTML = '';
+    state.turnOrder.map(id=>state.groups.find(g=>g.id===id)).forEach(g=>{
+      const chip = document.createElement('div');
+      chip.className = 'score-chip';
+      chip.id = 'score-'+g.id;
+      chip.style.borderColor = 'var(--ink)';
+      chip.style.background = g.theme.bg;
+      chip.style.color = g.theme.text;
+      board.appendChild(chip);
+    });
+    updateScoreboard();
+  }
+
+  function updateScoreboard(){
+    state.groups.forEach(g=>{
+      const chip = document.getElementById('score-'+g.id);
+      if(!chip) return;
+      const remaining = g.words.filter(w=>!w.done).length;
+      let label = g.name+' • '+remaining+'/9';
+      if(g.shieldChilli > 0){
+        label += ' 🛡️' + (g.shieldChilli > 1 ? 'x'+g.shieldChilli : '');
+      }
+      chip.textContent = label;
+      chip.classList.toggle('active-turn', g.id === state.currentGroupId);
+    });
+  }
+
+  /* ================= HOT DECK UI ================= */
+  function updateHotDeckUI(){
+    const wrap = document.getElementById('hotDeckWrap');
+    if(state.mode !== 'hot'){
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'flex';
+    document.getElementById('hotDeckCount').textContent = state.hotDeck.length + (state.hotDeck.length===1 ? ' card' : ' cards');
+    const btn = document.getElementById('btnDrawHot');
+    btn.disabled = state.hotDrawnThisTurn || state.hotDeck.length === 0 || state.locked;
+  }
+
+  document.getElementById('btnDrawHot').addEventListener('click', ()=>{
+    if(state.mode !== 'hot') return;
+    if(state.locked) return;
+    if(state.hotDrawnThisTurn) return;
+    if(!state.hotDeck.length) return;
+    drawHotCard();
+  });
+
+  function drawHotCard(){
+    state.hotDrawnThisTurn = true;
+    state.locked = true;
+    updateHotDeckUI();
+    SND.play('card');
+    const card = state.hotDeck.pop();
+    updateHotDeckUI();
+    const group = state.groups.find(g=>g.id===state.currentGroupId);
+    showHotCardModal(card, group);
+  }
+
+  function showHotCardModal(card, group){
+    const overlay = document.getElementById('hotCardOverlay');
+    const badge = document.getElementById('hotCardBadge');
+    const titleEl = document.getElementById('hotCardTitle');
+    const subEl = document.getElementById('hotCardSubtitle');
+    const effEl = document.getElementById('hotCardEffect');
+    const prompt = document.getElementById('hotCardPrompt');
+    const actions = document.getElementById('hotCardActions');
+
+    const isChilli = card.category === 'chilli';
+    setTimeout(()=>SND.play(isChilli ? 'chilli' : 'sweet'), 280);
+    badge.textContent = isChilli ? '🌶️ CHILLI' : '🍯 SWEET CHILLI';
+    badge.style.background = isChilli ? 'var(--red)' : 'var(--green)';
+    titleEl.textContent = card.title;
+    subEl.textContent = card.subtitle;
+    prompt.textContent = '';
+    actions.innerHTML = '';
+
+    const blocked = isChilli && group.shieldChilli > 0;
+    if(blocked){
+      effEl.textContent = card.effect + '  —  🛡️The shield protected you!';
+    } else {
+      effEl.textContent = card.effect;
+    }
+
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-green';
+    okBtn.textContent = 'OK';
+    okBtn.addEventListener('click', ()=>{
+      if(blocked){
+        group.shieldChilli -= 1;
+        updateScoreboard();
+        closeHotCardOverlay();
+        afterHotCardResolved(group);
+        return;
+      }
+      applyHotEffect(card, group);
+    });
+    actions.appendChild(okBtn);
+
+    overlay.classList.add('active');
+  }
+
+  function closeHotCardOverlay(){
+    document.getElementById('hotCardOverlay').classList.remove('active');
+  }
+
+  function showTeamPicker(fromGroup, callback){
+    const prompt = document.getElementById('hotCardPrompt');
+    const actions = document.getElementById('hotCardActions');
+    prompt.textContent = 'Which group would you like to give?';
+    actions.innerHTML = '';
+    state.groups.filter(g=>g.id!==fromGroup.id).forEach(g=>{
+      const b = document.createElement('button');
+      b.className = 'btn btn-ghost';
+      b.style.background = g.theme.bg;
+      b.style.color = g.theme.text;
+      b.textContent = g.name;
+      b.addEventListener('click', ()=>{ callback(g); });
+      actions.appendChild(b);
+    });
+  }
+
+  function applyHotEffect(card, group){
+    const finishAndContinue = () => { closeHotCardOverlay(); afterHotCardResolved(group); };
+
+    switch(card.effectType){
+      case 'add_now':
+        addWordsToGroup(group, card.n);
+        spawnPop(group.theme.bg, '+'+card.n+(card.n>1?' CARDS!':' CARD!'));
+        finishAndContinue();
+        break;
+
+      case 'cond_wrong':
+        group.pendingWrongPenalty = card.n;
+        finishAndContinue();
+        break;
+
+      case 'say_backwards':
+        finishAndContinue();
+        break;
+
+      case 'guess_two':
+        state.turnGuessesLeft = 2;
+        finishAndContinue();
+        break;
+
+      case 'see_all':
+        state.revealAllThisTurn = true;
+        finishAndContinue();
+        break;
+
+      case 'block_chilli':
+        group.shieldChilli = (group.shieldChilli || 0) + 1;
+        updateScoreboard();
+        finishAndContinue();
+        break;
+
+      case 'give_to_team':
+        showTeamPicker(group, (target)=>{
+          addWordsToGroup(target, 1);
+          finishAndContinue();
+        });
+        break;
+
+      case 'delete_card':
+        deleteCardFromGroup(group);
+        closeHotCardOverlay();
+        setTimeout(()=>{
+          if(checkGroupFinished(group)){ showWin(group); }
+          else { afterHotCardResolved(group); }
+        }, 320);
+        break;
+
+      case 'lose_turn':
+        closeHotCardOverlay();
+        SND.play('wrong'); spawnPop(group.theme.bg, 'TURN LOST!');
+        setTimeout(()=>{ advanceTurn(); }, 550);
+        break;
+
+      case 'delete_end_turn':
+        deleteCardFromGroup(group);
+        closeHotCardOverlay();
+        setTimeout(()=>{
+          if(checkGroupFinished(group)){ showWin(group); }
+          else { advanceTurn(); }
+        }, 320);
+        break;
+    }
+  }
+
+  function afterHotCardResolved(group){
+    renderGrid(group, false);
+    unlock();
+  }
+
+  function checkGroupFinished(group){
+    return group.words.every(w=>w.done);
+  }
+
+  function addWordsToGroup(group, n){
+    for(let i=0;i<n;i++){
+      let w;
+      if(state.extraPool.length){
+        w = state.extraPool.pop();
+      } else {
+        w = state.activePool[Math.floor(Math.random()*state.activePool.length)];
+      }
+      const newId = 'g'+group.id+'_x'+group.words.length+'_'+Math.random().toString(36).slice(2,6);
+      const wordObj = {id:newId, text:w, done:false};
+      group.words.push(wordObj);
+      group.order.push(newId);
+    }
+    updateScoreboard();
+  }
+
+  function deleteCardFromGroup(group){
+    const remaining = group.words.filter(w=>!w.done);
+    if(!remaining.length) return;
+    const victim = remaining[Math.floor(Math.random()*remaining.length)];
+    victim.done = true;
+    updateScoreboard();
+  }
+
+  /* ================= TURN / GRID ================= */
+  function showTurnSplash(group, callback){
+    const splash = document.getElementById('turnSplash');
+    const text = document.getElementById('splashText');
+    splash.style.background = group.theme.bg;
+    text.style.color = group.theme.text;
+    text.textContent = 'TURN: ' + group.name.toUpperCase();
+    splash.classList.add('active');
+    SND.play('whoosh');
+    setTimeout(()=>{
+      splash.classList.remove('active');
+      callback();
+    }, 850);
+  }
+
+  function unlock(){
+    state.locked = false;
+    updateHotDeckUI();
+  }
+
+  function startTurn(groupId){
+    const group = state.groups.find(g=>g.id===groupId);
+    state.currentGroupId = groupId;
+    state.locked = true;
+    state.hotDrawnThisTurn = false;
+    state.turnGuessesLeft = 1;
+    state.revealAllThisTurn = false;
+
+    document.getElementById('turnBanner').style.background = group.theme.bg;
+    document.getElementById('turnBanner').style.color = group.theme.text;
+    document.getElementById('turnBanner').textContent = 'Turn: ' + group.name;
+    updateScoreboard();
+    updateHotDeckUI();
+
+    showTurnSplash(group, ()=>{
+      renderGrid(group, true, ()=>{
+        // shuffle remaining cards visually
+        const grid = document.getElementById('cardGrid');
+        const remainingIds = group.words.filter(w=>!w.done).map(w=>w.id);
+        const newOrder = shuffle(remainingIds);
+        group.order = newOrder;
+        if(remainingIds.length > 1){
+          flipReorder(grid, newOrder, 380, ()=>{ unlock(); });
+        } else {
+          unlock();
+        }
+      });
+    });
+  }
+
+  function renderGrid(group, dealAnim, done){
+    const grid = document.getElementById('cardGrid');
+    grid.innerHTML = '';
+    const orderedWords = group.order
+      .map(id => group.words.find(w=>w.id===id))
+      .filter(w => w && !w.done);
+
+    const showText = state.mode === 'hot' && state.revealAllThisTurn && group.id === state.currentGroupId;
+
+    orderedWords.forEach((word, i)=>{
+      const card = document.createElement('div');
+      card.className = 'card' + (dealAnim ? ' dealt' : '');
+      if(dealAnim) card.style.animationDelay = (i*35)+'ms';
+      card.dataset.key = word.id;
+      card.style.background = group.theme.bg;
+      if(showText){
+        card.innerHTML = '<span class="card-word">'+(verbInfo(word.text) ? '<span class="mine-mark">💣</span>' : '')+word.text+'</span>';
+      } else {
+        card.innerHTML = '<span class="qmark">?</span>';
+      }
+      card.addEventListener('click', ()=>{
+        if(state.locked) return;
+        onCardClick(word, group, card);
+      });
+      grid.appendChild(card);
+    });
+    if(done) setTimeout(done, 20);
+  }
+
+  /* ================= REVEAL / ANSWER ================= */
+  let activeWord = null, activeGroup = null, activeCardEl = null;
+  let revealTimer = null, revealTimeLeft = 20;
+
+  function onCardClick(word, group, cardEl){
+    state.locked = true;
+    activeWord = word; activeGroup = group; activeCardEl = cardEl;
+    const info = verbInfo(word.text);
+    const rc = document.getElementById('revealCard');
+    if(info){
+      rc.classList.add('mine');
+      SND.play('mine');
+      mineFlash();
+    } else {
+      rc.classList.remove('mine');
+      SND.play('card');
+    }
+    document.getElementById('revealWordText').textContent = word.text;
+    document.getElementById('revealOverlay').classList.add('active');
+    startRevealTimer();
+  }
+
+  function mineFlash(){
+    const f = document.createElement('div');
+    f.className = 'mine-flash';
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(), 650);
+  }
+
+  function startRevealTimer(){
+    clearRevealTimer();
+    revealTimeLeft = 20;
+    const fill = document.getElementById('timerBarFill');
+    const num = document.getElementById('timerNum');
+    fill.style.transition = 'none';
+    fill.style.width = '100%';
+    fill.style.background = 'var(--green)';
+    num.textContent = revealTimeLeft;
+    requestAnimationFrame(()=>{ fill.style.transition = 'width 1s linear, background .3s'; });
+    revealTimer = setInterval(()=>{
+      revealTimeLeft--;
+      const shown = Math.max(revealTimeLeft, 0);
+      num.textContent = shown;
+      fill.style.width = (shown/20*100)+'%';
+      if(revealTimeLeft <= 5){ fill.style.background = 'var(--red)'; }
+      if(revealTimeLeft <= 5 && revealTimeLeft > 0){ SND.play('tick'); }
+      if(revealTimeLeft <= 0){
+        clearRevealTimer();
+        resolvePass(true);
+      }
+    }, 1000);
+  }
+
+  function clearRevealTimer(){
+    if(revealTimer){ clearInterval(revealTimer); revealTimer = null; }
+  }
+
+  document.getElementById('btnCorrect').addEventListener('click', ()=>{ resolveCorrect(); });
+  document.getElementById('btnPass').addEventListener('click', ()=>{ resolvePass(false); });
+
+  function resolveCorrect(){
+    clearRevealTimer();
+    closeReveal();
+    activeWord.done = true;
+    // Correct answer clears any pending "if wrong" chilli penalty for this group
+    // so it never carries over into a future turn.
+    if(activeGroup.pendingWrongPenalty){
+      activeGroup.pendingWrongPenalty = 0;
+    }
+    if(activeCardEl){
+      activeCardEl.classList.add('removing');
+    }
+    SND.play('correct');
+    spawnPop(activeGroup.theme.bg, 'CORRECT!');
+    updateScoreboard();
+
+    const finished = activeGroup.words.every(w=>w.done);
+    setTimeout(()=>{
+      if(finished){
+        showWin(activeGroup);
+      } else {
+        continueOrAdvance();
+      }
+    }, 320);
+  }
+
+  function resolvePass(auto){
+    clearRevealTimer();
+    closeReveal();
+    SND.play('wrong');
+    if(auto){
+      spawnPop(activeGroup.theme.bg, "TIME'S UP!");
+    }
+    if(activeGroup.pendingWrongPenalty){
+      const n = activeGroup.pendingWrongPenalty;
+      activeGroup.pendingWrongPenalty = 0;
+      addWordsToGroup(activeGroup, n);
+      setTimeout(()=>{ spawnPop(activeGroup.theme.bg, '+'+n+(n>1?' CARDS!':' CARD!')); }, auto ? 500 : 0);
+    }
+    setTimeout(()=>{ continueOrAdvance(); }, 120);
+  }
+
+  function closeReveal(){
+    document.getElementById('revealOverlay').classList.remove('active');
+  }
+
+  function spawnPop(color, label){
+    const badge = document.createElement('div');
+    badge.className = 'pop-badge burst-wrap';
+    badge.style.left = '50%';
+    badge.style.top = '38%';
+    badge.style.width = '150px';
+    badge.style.height = '150px';
+    badge.style.transform = 'translate(-50%,-50%)';
+    badge.style.animation = 'popBadge 700ms ease forwards';
+    badge.innerHTML = '<div class="burst-outline"></div><div class="burst-color" style="background:'+color+'"></div><div class="burst-content" style="font-size:1rem;">'+label+'</div>';
+    document.body.appendChild(badge);
+    setTimeout(()=>badge.remove(), 750);
+  }
+
+  function continueOrAdvance(){
+    state.turnGuessesLeft -= 1;
+    const group = state.groups.find(g=>g.id===state.currentGroupId);
+    if(state.turnGuessesLeft > 0 && !checkGroupFinished(group)){
+      spawnPop(group.theme.bg, 'ONE MORE CARD!');
+      renderGrid(group, false, ()=>{ unlock(); });
+    } else {
+      advanceTurn();
+    }
+  }
+
+  function advanceTurn(){
+    state.turnPointer = (state.turnPointer + 1) % state.turnOrder.length;
+    const nextId = state.turnOrder[state.turnPointer];
+    startTurn(nextId);
+  }
+
+  /* ================= WIN ================= */
+  function showWin(group){
+    document.getElementById('winTeamName').textContent = group.name;
+    document.querySelector('#screen-win .burst-color').style.background = group.theme.bg;
+    showScreen('screen-win');
+    SND.play('win');
+  }
+
+  document.getElementById('btnReplay').addEventListener('click', ()=>{
+    document.querySelectorAll('.count-chip').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('btnGoOrder').disabled = true;
+    state.mode = 'classic';
+    state.minefield = false;
+    document.getElementById('mineToggle').checked = false;
+    state.source = 'basic';
+    state.groups = [];
+    state.turnOrder = [];
+    state.turnPointer = 0;
+    state.currentGroupId = null;
+    state.hotDeck = [];
+    state.hotDrawnThisTurn = false;
+    state.turnGuessesLeft = 1;
+    state.revealAllThisTurn = false;
+    state.extraPool = [];
+    showScreen('screen-start');
+  });
+
+})();
+</script>
+</body>
+</html>
